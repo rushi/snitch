@@ -1,0 +1,20 @@
+{
+    "go": {
+        "url": "",
+        "username": "",
+        "password": ""
+    },
+
+    "slack": {
+        "token": "",
+        "signingSecret": ""
+    },
+
+    "jira": {
+        "url": "https://xola01.atlassian.net"
+    },
+
+    "whitelist": {
+        "emails": []
+    }
+}

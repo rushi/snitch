@@ -1,0 +1,100 @@
+{
+    "pipeline": {
+        "name": "trigger-go-hack.nemanjakrstic",
+        "counter": "2",
+        "label": "2",
+        "group": "xola_branch",
+        "build-cause": [
+            {
+                "material": {
+                    "git-configuration": {
+                        "shallow-clone": false,
+                        "branch": "trigger-go-hack",
+                        "url": "https://xolarian:******@github.com/nemanjakrstic/xola.git"
+                    },
+                    "type": "git"
+                },
+                "changed": false,
+                "modifications": [
+                    {
+                        "revision": "52c416f2979e27e89099dac1b4270753eeb0301b",
+                        "modified-time": "2021-04-08T14:53:38.000+0000",
+                        "data": {
+                            "signingMessage": "",
+                            "subject": "XOL-123 Break jscs",
+                            "signed": "N",
+                            "committerName": "Nemanja K",
+                            "committerEmail": "nemanja.k@xola.com",
+                            "commitDate": "2021-04-08 16:53:38 +0200"
+                        }
+                    }
+                ]
+            },
+            {
+                "material": {
+                    "git-configuration": {
+                        "shallow-clone": false,
+                        "branch": "master",
+                        "url": "https://xolarian:******@github.com/nemanjakrstic/elrond.git"
+                    },
+                    "type": "git"
+                },
+                "changed": false,
+                "modifications": [
+                    {
+                        "revision": "4cb421fd52677f091a3684d15e16c85659f9bd84",
+                        "modified-time": "2020-10-21T10:50:17.000+0000",
+                        "data": {
+                            "signingMessage": "gpg: WARNING: unsafe ownership on homedir '/var/go/.gnupg'\ngpg: failed to create temporary file '/var/go/.gnupg/.#lk0x00005623e54f2cf0.sage.24137': Permission denied\ngpg: keyblock resource '/var/go/.gnupg/pubring.kbx': Permission denied\ngpg: Signature made Wed Oct 21 10:50:17 2020 UTC\ngpg:                using RSA key 4AEE18F83AFDEB23\ngpg: Can't check signature: No public key",
+                            "subject": "CS-5033 Admin user not able to see Waivers or Capacity Utilization Report (#69)",
+                            "signed": "E",
+                            "signingKey": "4AEE18F83AFDEB23",
+                            "committerName": "GitHub",
+                            "committerEmail": "noreply@github.com",
+                            "commitDate": "2020-10-21 16:20:17 +0530"
+                        }
+                    }
+                ]
+            }
+        ],
+        "stage": {
+            "name": "lint",
+            "counter": "18",
+            "approval-type": "success",
+            "approved-by": "nemanja.k@xola.com",
+            "state": "Building",
+            "result": "Unknown",
+            "create-time": "2021-04-09T09:31:37.781+0000",
+            "last-transition-time": "2021-04-09T09:22:59.167+0000",
+            "jobs": [
+                {
+                    "name": "phplint",
+                    "schedule-time": "2021-04-08T15:49:54.198+0000",
+                    "assign-time": "2021-04-08T15:50:00.304+0000",
+                    "complete-time": "2021-04-08T15:51:09.932+0000",
+                    "state": "Completed",
+                    "result": "Passed",
+                    "agent-uuid": "25d15d70-1b76-420f-8a6f-9537f6360d14"
+                },
+                {
+                    "name": "jscs",
+                    "schedule-time": "2021-04-08T15:49:54.199+0000",
+                    "assign-time": "2021-04-08T15:50:00.972+0000",
+                    "complete-time": "2021-04-08T15:50:42.282+0000",
+                    "state": "Completed",
+                    "result": "Passed",
+                    "agent-uuid": "19ea956c-c574-48ff-9fed-bbd4100a2d96"
+                },
+                {
+                    "name": "jshint",
+                    "schedule-time": "2021-04-09T09:31:37.781+0000",
+                    "assign-time": "",
+                    "complete-time": "",
+                    "state": "Scheduled",
+                    "result": "Unknown",
+                    "agent-uuid": null
+                }
+            ]
+        }
+    }
+}
