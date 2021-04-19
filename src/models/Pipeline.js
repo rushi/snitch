@@ -45,6 +45,8 @@ class Pipeline extends Model {
     shouldNotify() {
         const { state, result } = this.get("stage", {});
 
+        // Implement more conditions here.
+
         if (
             (state === Pipeline.STAGE_FAILED && result === Pipeline.STAGE_FAILED) ||
             (state === Pipeline.STAGE_CANCELLED && result === Pipeline.STAGE_CANCELLED)
