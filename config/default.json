@@ -11,7 +11,7 @@
     },
 
     "jira": {
-        "url": "https://xola01.atlassian.net"
+        "url": ""
     },
 
     "whitelist": {
