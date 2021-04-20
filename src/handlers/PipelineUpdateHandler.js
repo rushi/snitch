@@ -24,6 +24,7 @@ class PipelineUpdateHandler extends Handler {
         // console.log(JSON.stringify(request.body, null, 2));
         const notification = new PipelineFailedNotification(pipeline).toJSON();
 
+        console.log(`Notify ${userChannel}`);
         await this.app.client.chat.postMessage({
             token: config.get("slack.token"),
             channel: userChannel,

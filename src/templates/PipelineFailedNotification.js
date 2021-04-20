@@ -63,16 +63,6 @@ class PipelineFailedNotification {
                     // text: "",
                     fields,
                     footer: "Status: " + pipeline.get("stage.result"),
-
-                    callback_id: "wtf",
-                    actions: [
-                        {
-                            name: "game",
-                            text: "Rerun Failed Jobs",
-                            type: "button",
-                            value: "chess",
-                        },
-                    ],
                 },
             ],
         };
