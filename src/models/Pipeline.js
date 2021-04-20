@@ -45,7 +45,12 @@ class Pipeline extends Model {
     shouldNotify() {
         const { state, result } = this.get("stage", {});
 
-        // Implement more conditions here.
+        // Implement more conditions here
+        
+        if (this.getCommitMessage().match(/merge branch/i)) {
+            console.log("This is a merge commit, skipping it\n", this.getCommitMessage());
+            return false;
+        }
 
         if (
             (state === Pipeline.STAGE_FAILED && result === Pipeline.STAGE_FAILED) ||
