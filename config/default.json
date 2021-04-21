@@ -16,5 +16,7 @@
 
     "whitelist": {
         "emails": []
-    }
+    },
+
+    "includeMergeCommits": true
 }

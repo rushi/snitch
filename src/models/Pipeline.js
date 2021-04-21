@@ -2,6 +2,7 @@ const config = require("config");
 const Model = require("./Model");
 const _ = require("lodash");
 const Go = require("../services/go");
+const md5 = require("md5");
 
 class Pipeline extends Model {
     static STAGE_FAILED = "Failed";
@@ -47,8 +48,8 @@ class Pipeline extends Model {
 
         // Implement more conditions here
         
-        if (this.getCommitMessage().match(/merge branch/i)) {
-            console.log("This is a merge commit, skipping it\n", this.getCommitMessage());
+        if (!config.get('includeMergeCommits') && this.getCommitMessage().match(/merge branch/i)) {
+            console.log("This is a merge commit, skipping it\n", this.getCommitterName(), this.getCommitMessage());
             return false;
         }
 
@@ -89,7 +90,7 @@ class Pipeline extends Model {
     }
 
     getCommitterAvatarUrl() {
-        return ["https://github.com", this.getGitHubUser() + ".png?size=16"].join("/");
+        return [`https://www.gravatar.com/avatar/${this.getCommitterEmail()}`];
     }
 
     getTicketNumber() {
