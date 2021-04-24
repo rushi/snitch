@@ -19,6 +19,11 @@ class Pipeline extends Model {
         return [config.get("go.url"), "go", "pipelines", this.getUri(), "jobs"].join("/");
     }
 
+    getRerunUri() {
+        const uri = [this.get("name"), this.get("label"), this.getStageName().trim("/"), "run-failed-jobs"];
+        return `/go/api/stages/` + uri.join("/");
+    }
+
     getName() {
         return [this.get("name"), this.get("counter")].join("/");
     }

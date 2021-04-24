@@ -10,6 +10,47 @@ class PipelineUpdateHandler extends Handler {
         return !!request.body?.pipeline;
     }
 
+    async parseFailures(pipeline, detail = false) {
+        const failedJobs = pipeline.getFailedJobs();
+        if (failedJobs.length === 0 || failedJobs.length > 10) {
+            console.log(`Not enough or Too many failures, not going to get failures Count: ${failedJobs.length}`);
+            return;
+        }
+
+        const failures = new Set();
+        const junitJobs = await pipeline.getJunitJSON();
+        junitJobs.forEach((junit) => {
+            const testCaseList = junit.suites.map((suite) => {
+                const hasErrors = suite.errors > 0 || suite.failures > 0;
+                return hasErrors ? suite.testCases.filter((tc) => tc.type === "error" || tc.type === "failure") : [];
+            });
+
+            testCaseList.forEach((testCases) => {
+                testCases.forEach((tc) => {
+                    let line;
+                    if (tc.file) {
+                        line = `${path.basename(tc.file)} Line: ${tc.line}\n`;
+                        if (detail) {
+                            tc.messages.values.forEach((m) => {
+                                const lines = m.value.split("\n").slice(0, 5);
+                                lines.forEach((l) => (line += `${' '.repeat(4) + l}\n`));
+                            });
+                        } else {
+                            line += `\n    ${tc.name}`;
+                        }
+                        line += "\n";
+                    } else if (tc.className) {
+                        line = `${tc.classname}`;
+                    }
+                    failures.add(line);
+                });
+            });
+        });
+
+        console.log("failures", failures);
+        failures.size > 0 && pipeline.set("failures", failures);
+    }
+
     async handle(request) {
         const pipeline = new Pipeline(request.body.pipeline);
 
@@ -25,24 +66,7 @@ class PipelineUpdateHandler extends Handler {
             }
         }
 
-        if (pipeline.hasFailed() && pipeline.getFailedJobs().length < 10) {
-            const failures = new Set();
-            const junitJobs = await pipeline.getJunitJSON();
-            junitJobs.forEach((junit) => {
-                const suites = junit.suites.filter((s) => s.testCases && (s.errors > 0 || s.failures > 0));
-                const testCases = suites.filter((s) => {
-                    return s.testCases.filter((tc) => tc.type === "error" || tc.type === "failure");
-                });
-                testCases.flat().forEach((tc) => {
-                    if (tc.file) {
-                        failures.add(`${path.basename(tc.file)}:${tc.line}\n    ${tc.name}\n\n`);
-                    } else {
-                        failures.add(`${tc.classname}`);
-                    }
-                });
-            });
-            failures.size > 0 && pipeline.set("failures", failures);
-        }
+        await this.parseFailures(pipeline);
 
         let emails = new Set([pipeline.getCommitterEmail()]);
         if (pipeline.getApprovedByEmail()) {

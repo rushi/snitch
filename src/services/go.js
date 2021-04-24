@@ -7,17 +7,16 @@ const api = axios.create({
 });
 
 const Go = {
-    runFailedJobs(uri) {
-        return api.post(
-            `/go/api/stages/${uri}/run-failed-jobs`,
-            {},
-            {
-                headers: {
-                    "X-GoCD-Confirm": "true",
-                    Accept: "application/vnd.go.cd.v2+json",
-                },
-            },
-        );
+    async runFailedJobs(uri) {
+        const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v2+json" } };
+        try {
+            const { data } = await api.post(uri, {}, headers);
+            console.log('Rerun response', data);
+            return data;
+        } catch (err) {
+            console.log("Error re-trigerring", err.message);
+            return { message: err.message};
+        }
     },
 
     async getJunitFileForJob(name, stage, jobName) {
@@ -43,6 +42,18 @@ const Go = {
         } catch (err) {
             console.log(`Error fetching junit xml`, url, err.message);
         }
+    },
+
+    async fetchStageHistory(pipeline, stage) {
+        const url = `/go/api/stages/${pipeline}/${stage}/history?page_size=100`;
+        const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v2+json" } };
+        try {
+            const { data } = await api.get(url, headers);
+            return data;
+        } catch(err) {
+            console.log('Error fetching stage history', err.message);
+        }
+        return null;
     },
 
     async fetchPipelineInstance(pipeline) {

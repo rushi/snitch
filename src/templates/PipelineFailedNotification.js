@@ -53,10 +53,10 @@ class PipelineFailedNotification {
         const failures = pipeline.get("failures");
         const failedJobs = pipeline.getFailedJobs();
         let failedTestsCount = 0;
+        const failedJobsOutputLimit = 10;
         if (failedJobs.length > 0) {
-            const limit = 10;
             let message = failedJobs
-                .slice(0, limit)
+                .slice(0, failedJobsOutputLimit)
                 .map((j) => `<${pipeline.getJobUrl(j.name)}|${j.name}>`)
                 .join(", ");
 
@@ -85,6 +85,42 @@ class PipelineFailedNotification {
             footer = `Status: Fully successfull`;
         }
 
+        const actions = [];
+        const rerunAction = {
+            name: "rerun",
+            text: ":repeat: Rerun Failed Jobs",
+            type: "button",
+            value: JSON.stringify({
+                name: pipeline.getUri(),
+                stage: pipeline.getStageName(),
+                counter: pipeline.get("counter"),
+                uri: this.pipeline.getRerunUri(),
+            }),
+        };
+
+        if (pipeline.get("counter") < 10) {
+            // Only give the re-run option if this build has been re-run fewer than 10 times
+            // Force the engineer to re-check Go and not keep clicking this button
+            actions.push(rerunAction);
+        }
+
+        if (failedJobs.length > 0 && failedJobs.length < failedJobsOutputLimit) {
+            actions.push({
+                name: "output",
+                text: ":pencil: Show full test results",
+                type: "button",
+                value: JSON.stringify({
+                    pipeline: pipeline.get("name"),
+                    name: pipeline.getName(),
+                    counter: pipeline.get('stage.counter'),
+                    stage: pipeline.get("stage.name"),
+                    jobs: failedJobs.map((j) => j.name),
+                }),
+            });
+        }
+
+        console.log('actions', actions);
+
         return {
             attachments: [
                 {
@@ -97,7 +133,9 @@ class PipelineFailedNotification {
                     title_link: pipeline.getCommitUrl(),
                     text: emails.join(" "),
                     fields,
-                    footer
+                    footer,
+                    actions,
+                    callback_id: "build_response",
                 },
             ],
         };
