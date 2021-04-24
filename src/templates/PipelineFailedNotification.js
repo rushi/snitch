@@ -1,4 +1,5 @@
 const Pipeline = require("../models/Pipeline");
+const Go = require("../services/go");
 
 class PipelineFailedNotification {
     /**
@@ -17,6 +18,10 @@ class PipelineFailedNotification {
             return "#ff5a5a"; // Red
         }
 
+        if (this.pipeline.get("isFullyGreen")) {
+            return "#00FF7F";
+        }
+
         if (this.pipeline.get("stage.state") === Pipeline.STAGE_PASSED) {
             return "#27ce70"; // Green
         }
@@ -24,7 +29,7 @@ class PipelineFailedNotification {
         return "#1352c6"; // Blue
     }
 
-    toJSON() {
+    async toJSON() {
         const { pipeline } = this;
 
         const fields = [
@@ -40,22 +45,44 @@ class PipelineFailedNotification {
             },
         ];
 
+        let jiraLink = null;
         if (pipeline.getTicketNumber()) {
-            fields.push({
-                title: "JIRA",
-                value: `<${pipeline.getTicketUrl()}|${pipeline.getTicketNumber()}>`,
-                short: true,
-            });
+            jiraLink = `<${pipeline.getTicketUrl()}|${pipeline.getTicketNumber()}> `;
         }
 
         const state = this.pipeline.get("stage.state", "").toLowerCase();
+        let pretext = `${jiraLink} Pipeline stage ${state}`;
+        if (this.pipeline.get("isFullyGreen")) {
+            pretext = `:tada: ${jiraLink} Pipeline *${this.pipeline.get("name")}* is *fully green*`;
+        }
+        pretext += ` <${pipeline.getUrl()}|${pipeline.getUri()}>`;
+
+        const failures = pipeline.get("failures");
+        const failedJobs = pipeline.getFailedJobs();
+        if (failures && failedJobs.map) {
+            let message = failedJobs.map((j) => `<${pipeline.getJobUrl(j.name)}|${j.name}>`).join(", ");
+            if (failures.size > 10) {
+                message += "\n_Too many failures to list_";
+            } else {
+                failures.forEach((failure) => {
+                    const failureMsg = failure.replace(/^\s*\n/gm, ""); // Trim empty lines
+                    message += "```" + failureMsg + "``` ";
+                });
+            }
+
+            fields.push({
+                title: `Failed Jobs (${failedJobs.length})`,
+                value: message,
+                short: false,
+            });
+        }
 
         return {
             attachments: [
                 {
                     mrkdwn_in: [/*"text", */ "pretext"],
                     color: this.getColor(),
-                    pretext: `Pipeline stage ${state} <${pipeline.getUrl()}|${pipeline.getUri()}>`,
+                    pretext: pretext.trim(),
                     author_name: pipeline.getCommitterName(),
                     author_icon: pipeline.getCommitterAvatarUrl(),
                     title: pipeline.getCommitHash() + " " + pipeline.getCommitMessage(),

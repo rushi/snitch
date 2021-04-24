@@ -1,13 +1,15 @@
 const config = require("config");
 const Model = require("./Model");
 const _ = require("lodash");
-const Go = require("../services/go");
 const md5 = require("md5");
+const jv = require("junit-viewer");
+const Go = require("../services/go");
 
 class Pipeline extends Model {
     static STAGE_FAILED = "Failed";
     static STAGE_CANCELLED = "Cancelled";
     static STAGE_PASSED = "Passed";
+    static STAGE_UNKNOWN = "Unknown";
 
     getUri() {
         return [this.getName(), this.getStageName()].join("/");
@@ -37,40 +39,49 @@ class Pipeline extends Model {
         return this.get("build-cause.0.modifications.0.revision", "").substring(0, 7);
     }
 
+    getApprovedByEmail() {
+        return this.get("stage.approved-by");
+    }
+
     getCommitMessage() {
         const subject = this.get("build-cause.0.modifications.0.data.subject", "");
         const lines = subject.split("\n");
         return lines[0] === subject ? subject : lines[0] + "..."; // Append ellipsis if truncated
     }
 
-    shouldNotify() {
+    async shouldNotify() {
         const { state, result } = this.get("stage", {});
 
-        // Implement more conditions here
-        
-        if (!config.get('includeMergeCommits') && this.getCommitMessage().match(/merge branch/i)) {
-            console.log("This is a merge commit, skipping it\n", this.getCommitterName(), this.getCommitMessage());
+        if (result === Pipeline.STAGE_UNKNOWN) {
             return false;
         }
 
-        if (
-            (state === Pipeline.STAGE_FAILED && result === Pipeline.STAGE_FAILED) ||
-            (state === Pipeline.STAGE_CANCELLED && result === Pipeline.STAGE_CANCELLED)
-        ) {
+        if (this.hasFailed()) {
             return true;
         }
 
-        if (state === Pipeline.STAGE_PASSED && result === Pipeline.STAGE_PASSED) {
-            return Go.isPipelinePassed(this.getName());
-        }
-
-        return false;
+        return this.hasSucceeded();
     }
 
-    getFailedJob() {
-        return this.get("stage.jobs", []).find((job) => {
+    hasSucceeded() {
+        const { state, result } = this.get("stage", {});
+        return state === Pipeline.STAGE_PASSED && result === Pipeline.STAGE_PASSED;
+    }
+
+    hasFailed() {
+        const { result } = this.get("stage", {});
+        return result === Pipeline.STAGE_FAILED || result === Pipeline.STAGE_CANCELLED;
+    }
+
+    getFailedJobs() {
+        return this.get("stage.jobs", []).filter((job) => {
             return job.result === "Failed";
         });
+    }
+
+    getJobUrl(jobName) {
+        const base = `/go/tab/build/detail/${this.getName()}/${this.getStageName()}/${jobName}`;
+        return config.get("go.url") + base;
     }
 
     getRepoUrl() {
@@ -90,7 +101,7 @@ class Pipeline extends Model {
     }
 
     getCommitterAvatarUrl() {
-        return [`https://www.gravatar.com/avatar/${this.getCommitterEmail()}`];
+        return `https://www.gravatar.com/avatar/${md5(this.getCommitterEmail())}`;
     }
 
     getTicketNumber() {
@@ -100,6 +111,31 @@ class Pipeline extends Model {
     getTicketUrl() {
         const ticket = this.getTicketNumber();
         return ticket ? [config.get("jira.url"), "browse", ticket].join("/") : null;
+    }
+
+    async getJunitJSON() {
+        let failures = [{ suites: [] }];
+        let failedJobs = this.getFailedJobs();
+        if (!this.hasFailed() || failedJobs.length === 0) {
+            return failures;
+        }
+
+        let promises = [];
+        for (let fj of failedJobs) {
+            const junitPromise = Go.getJunitFileForJob(this.getName(), this.getStageName(), fj.name);
+            promises.push(junitPromise);
+        }
+
+        let allJunits = await Promise.all(promises);
+        allJunits.forEach((junit) => {
+            try {
+                failures.push(jv.parseXML(junit));
+            } catch (err) {
+                console.log("Error parsing XML", err.message);
+            }
+        });
+
+        return failures;
     }
 }
 

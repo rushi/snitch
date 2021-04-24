@@ -20,14 +20,56 @@ const Go = {
         );
     },
 
-    async isPipelinePassed(pipeline) {
-        const { data } = await api.get(`/go/api/pipelines/${pipeline}`, {
-            headers: {
-                Accept: "application/vnd.go.cd.v1+json",
-            },
-        });
+    async getJunitFileForJob(name, stage, jobName) {
+        const url = `/go/files/${name}/${stage}/${jobName}.json`;
+        const headers = { headers: { Accept: "application/vnd.go.cd.v1+json" } };
+        console.log(`Fetching artifacts for ${jobName}`, url);
 
-        return data.stages.every((stage) => {
+        const resp = api.get(url, headers);
+        try {
+            return resp.then((r) => {
+                const artifactNames = config.get("go.jobs.artifactName");
+                const junitFilenames = config.get("go.jobs.junitXmlFileName");
+                const testoutput = r.data.find((t) => artifactNames.includes(t.name));
+                if (testoutput && testoutput.files) {
+                    const file = testoutput.files.find((f) => junitFilenames.includes(f.name));
+                    if (file) {
+                        return api.get(file.url, headers).then((xml) => xml.data);
+                    }
+                } else {
+                    console.log("Weird, no data for", jobName);
+                }
+            });
+        } catch (err) {
+            console.log(`Error fetching junit xml`, url, err.message);
+        }
+    },
+
+    async fetchPipelineInstance(pipeline) {
+        let response = [];
+        const url = `/go/api/pipelines/${pipeline}`;
+        try {
+            const { data } = await api.get(url, {
+                headers: {
+                    Accept: "application/vnd.go.cd.v1+json",
+                },
+            });
+            response = data;
+        } catch (err) {
+            console.log(`Error fetching pipeline ${url}`, err.message);
+            response = [];
+        }
+
+        // console.log("Fetched pipeline", response);
+
+        return response;
+    },
+
+    async isEntirePipelineGreen(pipeline) {
+        const data = await this.fetchPipelineInstance(pipeline);
+        const latestRun = data.length > 0 ? data[0] : { stages: [] };
+
+        return latestRun.stages.every((stage) => {
             return stage.result === "Passed";
         });
     },
