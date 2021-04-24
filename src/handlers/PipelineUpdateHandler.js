@@ -30,12 +30,15 @@ class PipelineUpdateHandler extends Handler {
             const junitJobs = await pipeline.getJunitJSON();
             junitJobs.forEach((junit) => {
                 const suites = junit.suites.filter((s) => s.testCases && (s.errors > 0 || s.failures > 0));
-                suites.forEach((s) => {
-                    const testCases = s.testCases.filter((tc) => tc.type === "error" || tc.type === "failure");
-                    testCases.forEach((tc) => {
-                        const line = `${path.basename(tc.file)}:${tc.line}\n    ${tc.name}\n\n`;
-                        failures.add(line);
-                    });
+                const testCases = suites.filter((s) => {
+                    return s.testCases.filter((tc) => tc.type === "error" || tc.type === "failure");
+                });
+                testCases.flat().forEach((tc) => {
+                    if (tc.file) {
+                        failures.add(`${path.basename(tc.file)}:${tc.line}\n    ${tc.name}\n\n`);
+                    } else {
+                        failures.add(`${tc.classname}`);
+                    }
                 });
             });
             failures.size > 0 && pipeline.set("failures", failures);

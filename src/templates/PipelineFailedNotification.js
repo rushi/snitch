@@ -52,6 +52,7 @@ class PipelineFailedNotification {
 
         const failures = pipeline.get("failures");
         const failedJobs = pipeline.getFailedJobs();
+        let failedTestsCount = 0;
         if (failedJobs.length > 0) {
             const limit = 10;
             let message = failedJobs
@@ -65,6 +66,7 @@ class PipelineFailedNotification {
                 failures?.forEach((failure) => {
                     const failureMsg = failure.replace(/^\s*\n/gm, ""); // Trim empty lines
                     message += "```" + failureMsg + "``` ";
+                    failedTestsCount++;
                 });
             }
 
@@ -74,6 +76,13 @@ class PipelineFailedNotification {
         const emails = [`Commited By: ${pipeline.getCommitterEmail()}`];
         if (pipeline.getApprovedByEmail() !== pipeline.getCommitterEmail()) {
             emails.push(`Trigerred by: ${pipeline.getApprovedByEmail()}`);
+        }
+
+        let footer = `Status: ${pipeline.get("stage.result")}, well done`;
+        if (pipeline.hasFailed()) {
+            footer = `Status: ${pipeline.getFailedJobs().length} jobs & ${failedTestsCount} tests failed`;
+        } else if (this.pipeline.get("isFullyGreen")) {
+            footer = `Status: Fully successfull`;
         }
 
         return {
@@ -88,8 +97,7 @@ class PipelineFailedNotification {
                     title_link: pipeline.getCommitUrl(),
                     text: emails.join(" "),
                     fields,
-                    footer:
-                        "Status: " + (this.pipeline.get("isFullyGreen") ? "Completed" : pipeline.get("stage.result")),
+                    footer
                 },
             ],
         };

@@ -25,8 +25,8 @@ const Go = {
         const headers = { headers: { Accept: "application/vnd.go.cd.v1+json" } };
         console.log(`Fetching artifacts for ${jobName}`, url);
 
-        const resp = api.get(url, headers);
         try {
+            const resp = api.get(url, headers);
             return resp.then((r) => {
                 const artifactNames = config.get("go.jobs.artifactName");
                 const junitFilenames = config.get("go.jobs.junitXmlFileName");
