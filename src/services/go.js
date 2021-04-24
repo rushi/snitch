@@ -15,7 +15,7 @@ const Go = {
             return data;
         } catch (err) {
             console.log("Error re-trigerring", err.message);
-            return { message: err.message};
+            return { message: err.message };
         }
     },
 
@@ -24,24 +24,20 @@ const Go = {
         const headers = { headers: { Accept: "application/vnd.go.cd.v1+json" } };
         console.log(`Fetching artifacts for ${jobName}`, url);
 
-        try {
-            const resp = api.get(url, headers);
-            return resp.then((r) => {
-                const artifactNames = config.get("go.jobs.artifactName");
-                const junitFilenames = config.get("go.jobs.junitXmlFileName");
-                const testoutput = r.data.find((t) => artifactNames.includes(t.name));
-                if (testoutput && testoutput.files) {
-                    const file = testoutput.files.find((f) => junitFilenames.includes(f.name));
-                    if (file) {
-                        return api.get(file.url, headers).then((xml) => xml.data);
-                    }
-                } else {
-                    console.log("Weird, no data for", jobName);
+        const resp = api.get(url, headers);
+        return resp.then((r) => {
+            const artifactNames = config.get("go.jobs.artifactName");
+            const junitFilenames = config.get("go.jobs.junitXmlFileName");
+            const testoutput = r.data.find((t) => artifactNames.includes(t.name));
+            if (testoutput && testoutput.files) {
+                const file = testoutput.files.find((f) => junitFilenames.includes(f.name));
+                if (file) {
+                    return api.get(file.url, headers).then((xml) => xml.data);
                 }
-            });
-        } catch (err) {
-            console.log(`Error fetching junit xml`, url, err.message);
-        }
+            } else {
+                console.log("Weird, no data for", jobName);
+            }
+        });
     },
 
     async fetchStageHistory(pipeline, stage) {
@@ -50,8 +46,8 @@ const Go = {
         try {
             const { data } = await api.get(url, headers);
             return data;
-        } catch(err) {
-            console.log('Error fetching stage history', err.message);
+        } catch (err) {
+            console.log("Error fetching stage history", err.message);
         }
         return null;
     },

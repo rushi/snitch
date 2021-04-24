@@ -131,14 +131,18 @@ class Pipeline extends Model {
             promises.push(junitPromise);
         }
 
-        let allJunits = await Promise.all(promises);
-        allJunits.forEach((junit) => {
-            try {
-                failures.push(jv.parseXML(junit));
-            } catch (err) {
-                console.log("Error parsing XML", err.message);
-            }
-        });
+        try {
+            let allJunits = await Promise.all(promises);
+            allJunits.forEach((junit) => {
+                try {
+                    failures.push(jv.parseXML(junit));
+                } catch (err) {
+                    console.log("Error parsing XML", err.message);
+                }
+            });
+        } catch (err) {
+            console.log('Error while fetching junit XML', err.message);
+        }
 
         return failures;
     }

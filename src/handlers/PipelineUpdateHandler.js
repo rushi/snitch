@@ -42,12 +42,13 @@ class PipelineUpdateHandler extends Handler {
                     } else if (tc.className) {
                         line = `${tc.classname}`;
                     }
-                    failures.add(line);
+
+                    line && failures.add(line);
                 });
             });
         });
 
-        console.log("failures", failures);
+        console.log("parsed failures", failures.size, failures);
         failures.size > 0 && pipeline.set("failures", failures);
     }
 

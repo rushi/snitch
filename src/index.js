@@ -33,7 +33,7 @@ app.action({ callback_id: "build_response" }, async ({ action, say, ack }) => {
             Go.fetchPipelineInstance(payload.name),
             Go.fetchStageHistory(payload.pipeline, payload.stage),
         ]);
-        if (pipelineData) {
+        if (pipelineData && stageHistory.stages) {
             pipelineData.stage = stageHistory.stages.find((s) => s.counter === payload.counter);
             const pipeline = new Pipeline(pipelineData);
             const handler = new PipelineUpdateHandler();

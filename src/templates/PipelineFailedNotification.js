@@ -88,7 +88,7 @@ class PipelineFailedNotification {
         const actions = [];
         const rerunAction = {
             name: "rerun",
-            text: ":repeat: Rerun Failed Jobs",
+            text: ":repeat: Rerun Failed",
             type: "button",
             value: JSON.stringify({
                 name: pipeline.getUri(),
@@ -107,7 +107,7 @@ class PipelineFailedNotification {
         if (failedJobs.length > 0 && failedJobs.length < failedJobsOutputLimit) {
             actions.push({
                 name: "output",
-                text: ":pencil: Show full test results",
+                text: `:pencil: Show Full Results`,
                 type: "button",
                 value: JSON.stringify({
                     pipeline: pipeline.get("name"),
