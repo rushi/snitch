@@ -31,9 +31,7 @@ class PipelineUpdateHandler extends Handler {
             junitJobs.forEach((junit) => {
                 const suites = junit.suites.filter((s) => s.testCases && (s.errors > 0 || s.failures > 0));
                 suites.forEach((s) => {
-                    const testCases = s.testCases.filter((tc) => {
-                        return tc.type === "error" || tc.type === "failure";
-                    });
+                    const testCases = s.testCases.filter((tc) => tc.type === "error" || tc.type === "failure");
                     testCases.forEach((tc) => {
                         const line = `${path.basename(tc.file)}:${tc.line}\n    ${tc.name}\n\n`;
                         failures.add(line);
@@ -45,7 +43,6 @@ class PipelineUpdateHandler extends Handler {
 
         let emails = new Set([pipeline.getCommitterEmail()]);
         if (pipeline.getApprovedByEmail()) {
-            console.log("Approved by", pipeline.getApprovedByEmail());
             emails.add(pipeline.getApprovedByEmail());
         }
 
@@ -58,31 +55,36 @@ class PipelineUpdateHandler extends Handler {
             return false;
         }
 
-        const userChannel = await this.getChannelByEmail(email);
-        if (!userChannel) {
+        let user = await this.getChannelByEmail(email);
+        if (!user) {
             return;
         }
 
-        console.log(`Notify ${pipeline.getCommitterName()} ${email} ${userChannel}`);
+        user.id = "U02C4K1BF"; // To debug. Rushi's ID
+        console.log(`Notify ${pipeline.getCommitterName()} ${email} ${JSON.stringify(user)}`);
 
-        const notification = await new PipelineFailedNotification(pipeline).toJSON();
+        const notification = await new PipelineFailedNotification(pipeline, user).toJSON();
         await this.app.client.chat.postMessage({
             token: config.get("slack.token"),
-            channel: userChannel,
+            channel: user.id,
             ...notification,
         });
     }
 
     async getChannelByEmail(email) {
-        return "U02C4K1BF";
-        if (config.get("whitelist.emails").includes(email)) {
+        try {
             const result = await this.app.client.users.lookupByEmail({
                 token: config.get("slack.token"),
                 email,
             });
-
-            return result.user?.id;
+            if (result) {
+                return { id: result.user?.id, name: result.user?.real_name, avatar: result.user?.profile?.image_192 };
+            }
+        } catch (err) {
+            console.log("Error finding user", err.message);
         }
+
+        return null;
     }
 }
 
