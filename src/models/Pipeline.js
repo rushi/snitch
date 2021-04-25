@@ -45,7 +45,8 @@ class Pipeline extends Model {
     }
 
     getApprovedByEmail() {
-        return this.get("stage.approved-by");
+        const approvedBy = this.get("stage.approved-by");
+        return approvedBy.indexOf("@") >= 0 ? approvedBy : null;
     }
 
     getCommitMessage() {
