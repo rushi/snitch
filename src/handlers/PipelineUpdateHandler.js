@@ -33,7 +33,7 @@ class PipelineUpdateHandler extends Handler {
                         if (detail) {
                             tc.messages.values.forEach((m) => {
                                 const lines = m.value.split("\n").slice(0, 5);
-                                lines.forEach((l) => (line += `${' '.repeat(4) + l}\n`));
+                                lines.forEach((l) => (line += `${" ".repeat(4) + l}\n`));
                             });
                         } else {
                             line += `\n    ${tc.name}`;
@@ -52,6 +52,18 @@ class PipelineUpdateHandler extends Handler {
         failures.size > 0 && pipeline.set("failures", failures);
     }
 
+    hasPreviousBuildFailed(pipeline, stageHistory) {
+        const pipelineCounter = pipeline.get("counter");
+        const stageName = pipeline.get("stage.name");
+        const stageCounter = pipeline.get("stage.counter");
+
+        const previousBuild = stageHistory.stages.find((s) => {
+            return s.pipeline_counter == pipelineCounter && s.name === stageName && s.counter == stageCounter - 1;
+        });
+
+        return previousBuild && previousBuild.result === Pipeline.STAGE_PASSED;
+    }
+
     async handle(request) {
         const pipeline = new Pipeline(request.body.pipeline);
 
@@ -61,14 +73,19 @@ class PipelineUpdateHandler extends Handler {
 
         if (pipeline.hasSucceeded()) {
             const isFullyGreen = await Go.isEntirePipelineGreen(pipeline.getName());
-            console.log("isEntirePipelineGreen", isFullyGreen);
-            if (!isFullyGreen) {
-                // TODO: Only if the previous stage was failure/canceled
-                return;
+            if (isFullyGreen) {
+                pipeline.set("isFullyGreen", isFullyGreen);
+            } else {
+                const stageHistory = await Go.fetchStageHistory(pipeline.get("name"), pipeline.get("stage.name"));
+                const hasPreviousBuildSuceeded = this.hasPreviousBuildFailed(pipeline, stageHistory);
+                if (hasPreviousBuildSuceeded) {
+                    // Previous build suceeded, we don't need to notify again
+                    return;
+                }
             }
+        } else {
+            await this.parseFailures(pipeline);
         }
-
-        await this.parseFailures(pipeline);
 
         let emails = new Set([pipeline.getCommitterEmail()]);
         if (pipeline.getApprovedByEmail()) {

@@ -41,6 +41,7 @@ class PipelineFailedNotification {
         // Special message if the build is fully green
         const state = this.pipeline.get("stage.state", "").toLowerCase();
         let pretext = `${jira} Pipeline stage *${state}*`;
+        console.log("isFullyGreen", this.pipeline.get("isFullyGreen"));
         if (this.pipeline.get("isFullyGreen")) {
             pretext = `:partyparrot: ${jira} Pipeline *${this.pipeline.get("name")}* is *fully green*`;
         }
@@ -119,7 +120,7 @@ class PipelineFailedNotification {
             });
         }
 
-        console.log('actions', actions);
+        // console.log('actions', actions);
 
         return {
             attachments: [
