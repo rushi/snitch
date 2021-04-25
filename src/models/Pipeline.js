@@ -113,7 +113,7 @@ class Pipeline extends Model {
     getTicketNumber() {
         let ticketNumer = this.getCommitMessage().match(/\b[A-Z]{2,3}-\d{1,5}\b/)?.[0];
         if (!ticketNumer) {
-            ticketNumer = this.get('name').match(/\b[A-Z]{2,3}-\d{1,5}\b/)?.[0];
+            ticketNumer = this.get("name").match(/\b[A-Z]{2,3}-\d{1,5}\b/)?.[0];
         }
 
         return ticketNumer;

@@ -21,7 +21,7 @@ class PipelineUpdateHandler extends Handler {
         const junitJobs = await pipeline.getJunitJSON();
         junitJobs.forEach((junit) => {
             const testCaseList = junit.suites.map((suite) => {
-                const hasErrors = suite.errors > 0 || suite.failures > 0;
+                const hasErrors = suite.errors > 0 || suite.failures > 0 || suite.type === "failure";
                 return hasErrors ? suite.testCases.filter((tc) => tc.type === "error" || tc.type === "failure") : [];
             });
 
@@ -31,16 +31,15 @@ class PipelineUpdateHandler extends Handler {
                     if (tc.file) {
                         line = `${path.basename(tc.file)} Line: ${tc.line}\n`;
                         if (detail) {
-                            tc.messages.values.forEach((m) => {
-                                const lines = m.value.split("\n").slice(0, 5);
-                                lines.forEach((l) => (line += `${" ".repeat(4) + l}\n`));
-                            });
+                            line = this.processTestCaseMessages(tc.messages, line);
                         } else {
                             line += `\n    ${tc.name}`;
                         }
                         line += "\n";
                     } else if (tc.className) {
                         line = `${tc.classname}`;
+                    } else if (tc.messages) {
+                        line = this.processTestCaseMessages(tc.messages, line);
                     }
 
                     line && failures.add(line);
@@ -62,6 +61,14 @@ class PipelineUpdateHandler extends Handler {
         });
 
         return previousBuild && previousBuild.result === Pipeline.STAGE_PASSED;
+    }
+
+    processTestCaseMessages(messages, line) {
+        messages.values.forEach((m) => {
+            const lines = m.value.split("\n").slice(0, 5);
+            lines.forEach((l) => (line += `${" ".repeat(4) + l}\n`));
+        });
+        return line;
     }
 
     async handle(request) {

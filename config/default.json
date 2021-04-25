@@ -5,7 +5,7 @@
         "password": "",
         "jobs": {
             "artifactName": ["testoutput"],
-            "junitXmlFileName": ["junit.xml", "TEST-com.xola.tests.MainRun.xml"]
+            "junitXmlFileName": ["junit.xml", "jscs.xml", "jshint.xml", "TEST-com.xola.tests.MainRun.xml"]
         }
     },
 
