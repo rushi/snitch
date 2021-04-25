@@ -34,7 +34,7 @@ app.action({ callback_id: "build_response" }, async ({ action, say, ack }) => {
             Go.fetchStageHistory(payload.pipeline, payload.stage),
         ]);
         if (pipelineData && stageHistory.stages) {
-            pipelineData.stage = stageHistory.stages.find((s) => s.counter === payload.counter);
+            pipelineData.stage = stageHistory.stages.find((s) => s.counter == payload.counter);
             const pipeline = new Pipeline(pipelineData);
             const handler = new PipelineUpdateHandler();
             await handler.parseFailures(pipeline, true);

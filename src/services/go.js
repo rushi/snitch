@@ -41,7 +41,7 @@ const Go = {
     },
 
     async fetchStageHistory(pipeline, stage) {
-        const url = `/go/api/stages/${pipeline}/${stage}/history?page_size=100`;
+        const url = `/go/api/stages/${pipeline}/${stage}/history?page_size=99`;
         const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v2+json" } };
         try {
             const { data } = await api.get(url, headers);
