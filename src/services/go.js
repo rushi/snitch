@@ -11,7 +11,7 @@ const Go = {
         const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v2+json" } };
         try {
             const { data } = await api.post(uri, {}, headers);
-            console.log('Rerun response', data);
+            console.log("Rerun response", data);
             return data;
         } catch (err) {
             console.log("Error re-trigerring", err.message);
@@ -67,18 +67,16 @@ const Go = {
             response = [];
         }
 
-        // console.log("Fetched pipeline", response);
-
         return response;
     },
 
     async isEntirePipelineGreen(pipeline) {
         const data = await this.fetchPipelineInstance(pipeline);
-        const latestRun = data.length > 0 ? data[0] : { stages: [] };
+        if (!data) {
+            return null;
+        }
 
-        return latestRun.stages.every((stage) => {
-            return stage.result === "Passed";
-        });
+        return data.stages?.every((stage) => stage.result === "Passed");
     },
 };
 

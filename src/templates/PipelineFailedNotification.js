@@ -74,7 +74,7 @@ class PipelineFailedNotification {
         }
 
         const emails = [`Commited By: ${pipeline.getCommitterEmail()}`];
-        if (pipeline.getApprovedByEmail() !== pipeline.getCommitterEmail()) {
+        if (pipeline.getApprovedByEmail() && pipeline.getApprovedByEmail() !== pipeline.getCommitterEmail()) {
             emails.push(`Trigerred by: ${pipeline.getApprovedByEmail()}`);
         }
 

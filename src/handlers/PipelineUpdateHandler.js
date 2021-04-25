@@ -61,8 +61,9 @@ class PipelineUpdateHandler extends Handler {
 
         if (pipeline.hasSucceeded()) {
             const isFullyGreen = await Go.isEntirePipelineGreen(pipeline.getName());
-            pipeline.set("isFullyGreen", isFullyGreen);
+            console.log("isEntirePipelineGreen", isFullyGreen);
             if (!isFullyGreen) {
+                // TODO: Only if the previous stage was failure/canceled
                 return;
             }
         }
