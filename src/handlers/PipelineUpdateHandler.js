@@ -113,7 +113,6 @@ class PipelineUpdateHandler extends Handler {
             return;
         }
 
-        user.id = "U02C4K1BF"; // To debug. Rushi's ID
         console.log(`Notify ${pipeline.getCommitterName()} ${email} ${JSON.stringify(user)}`);
 
         const notification = await new PipelineFailedNotification(pipeline, user).toJSON();
