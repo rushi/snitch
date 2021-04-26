@@ -140,6 +140,9 @@ class Pipeline extends Model {
         try {
             let allJunits = await Promise.all(promises);
             allJunits.forEach((junit) => {
+                if (!junit) {
+                    return;
+                }
                 try {
                     failures.push(jv.parseXML(junit));
                 } catch (err) {
