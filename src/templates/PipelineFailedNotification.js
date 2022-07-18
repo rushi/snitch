@@ -35,13 +35,12 @@ class PipelineFailedNotification {
 
         const fields = [];
 
-        // Jira link and emails that committed and trigerred the build
+        // Jira link and emails that committed and triggered the build
         const jira = pipeline.getTicketNumber() ? `<${pipeline.getTicketUrl()}|${pipeline.getTicketNumber()}>` : null;
 
         // Special message if the build is fully green
         const state = this.pipeline.get("stage.state", "").toLowerCase();
-        let pretext = `${jira} Pipeline stage *${state}*`;
-        console.log("isFullyGreen", this.pipeline.get("isFullyGreen"));
+        let pretext = `${jira ?? ""} Pipeline stage *${state}*`;
         if (this.pipeline.get("isFullyGreen")) {
             pretext = `:partyparrot: ${jira} Pipeline *${this.pipeline.get("name")}* is *fully green*`;
         }
@@ -83,7 +82,7 @@ class PipelineFailedNotification {
         if (pipeline.hasFailed()) {
             footer = `Status: ${pipeline.getFailedJobs().length} jobs & ${failedTestsCount} tests failed`;
         } else if (this.pipeline.get("isFullyGreen")) {
-            footer = `Status: Fully successfull`;
+            footer = `Status: Fully successful`;
         }
 
         const actions = [];

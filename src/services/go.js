@@ -8,13 +8,13 @@ const api = axios.create({
 
 const Go = {
     async runFailedJobs(uri) {
-        const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v2+json" } };
+        const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v3+json" } };
         try {
             const { data } = await api.post(uri, {}, headers);
             console.log("Rerun response", data);
             return data;
         } catch (err) {
-            console.log("Error re-trigerring", err.message);
+            console.log("Error re-triggering", err.message);
             return { message: err.message };
         }
     },
@@ -28,9 +28,9 @@ const Go = {
         return resp.then((r) => {
             const artifactNames = config.get("go.jobs.artifactName");
             const junitFilenames = config.get("go.jobs.junitXmlFileName");
-            const testoutput = r.data.find((t) => artifactNames.includes(t.name));
-            if (testoutput && testoutput.files) {
-                const file = testoutput.files.find((f) => junitFilenames.includes(f.name));
+            const testOutput = r.data.find((t) => artifactNames.includes(t.name));
+            if (testOutput?.files) {
+                const file = testOutput.files.find((f) => junitFilenames.includes(f.name));
                 if (file) {
                     return api.get(file.url, headers).then((xml) => xml.data);
                 }
@@ -42,7 +42,7 @@ const Go = {
 
     async fetchStageHistory(pipeline, stage) {
         const url = `/go/api/stages/${pipeline}/${stage}/history?page_size=50`;
-        const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v2+json" } };
+        const headers = { headers: { "X-GoCD-Confirm": "true", Accept: "application/vnd.go.cd.v3+json" } };
         try {
             const { data } = await api.get(url, headers);
             return data;
@@ -53,7 +53,6 @@ const Go = {
     },
 
     async fetchPipelineInstance(pipeline) {
-        let response = [];
         const url = `/go/api/pipelines/${pipeline}`;
         try {
             const { data } = await api.get(url, {
@@ -61,13 +60,11 @@ const Go = {
                     Accept: "application/vnd.go.cd.v1+json",
                 },
             });
-            response = data;
+            return data;
         } catch (err) {
             console.log(`Error fetching pipeline ${url}`, err.message);
-            response = [];
+            return [];
         }
-
-        return response;
     },
 
     async isEntirePipelineGreen(pipeline) {

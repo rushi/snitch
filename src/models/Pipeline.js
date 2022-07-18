@@ -21,7 +21,7 @@ class Pipeline extends Model {
 
     getRerunUri() {
         const uri = [this.get("name"), this.get("label"), this.getStageName().trim("/"), "run-failed-jobs"];
-        return `/go/api/stages/` + uri.join("/");
+        return `/go/api/stages/${uri.join("/")}`;
     }
 
     getName() {
@@ -46,13 +46,13 @@ class Pipeline extends Model {
 
     getApprovedByEmail() {
         const approvedBy = this.get("stage.approved-by");
-        return approvedBy.indexOf("@") >= 0 ? approvedBy : null;
+        return approvedBy.includes("@") ? approvedBy : null;
     }
 
     getCommitMessage() {
         const subject = this.get("build-cause.0.modifications.0.data.subject", "");
         const lines = subject.split("\n");
-        return lines[0] === subject ? subject : lines[0] + "..."; // Append ellipsis if truncated
+        return lines[0] === subject ? subject : `${lines[0]}...`; // Append ellipsis if truncated
     }
 
     async shouldNotify() {
@@ -111,12 +111,13 @@ class Pipeline extends Model {
     }
 
     getTicketNumber() {
-        let ticketNumer = this.getCommitMessage().match(/\b[A-Z]{2,3}-\d{1,5}\b/)?.[0];
-        if (!ticketNumer) {
-            ticketNumer = this.get("name").match(/\b[A-Z]{2,3}-\d{1,5}\b/)?.[0];
+        const re = new RegExp(/\b[A-Z0-9]{2,5}-\d{1,5}\b/, "gmi");
+        const ticketNumber = this.getCommitMessage().match(re)?.[0];
+        if (!ticketNumber) {
+            return this.get("name").match(re)?.[0];
         }
 
-        return ticketNumer;
+        return ticketNumber;
     }
 
     getTicketUrl() {
@@ -125,20 +126,20 @@ class Pipeline extends Model {
     }
 
     async getJunitJSON() {
-        let failures = [{ suites: [] }];
-        let failedJobs = this.getFailedJobs();
+        const failures = [{ suites: [] }];
+        const failedJobs = this.getFailedJobs();
         if (!this.hasFailed() || failedJobs.length === 0) {
             return failures;
         }
 
-        let promises = [];
+        const promises = [];
         for (let fj of failedJobs) {
             const junitPromise = Go.getJunitFileForJob(this.getName(), this.getStageName(), fj.name);
             promises.push(junitPromise);
         }
 
         try {
-            let allJunits = await Promise.all(promises);
+            const allJunits = await Promise.all(promises);
             allJunits.forEach((junit) => {
                 if (!junit) {
                     return;

@@ -69,6 +69,6 @@ receiver.router.post("/api/actions", express.json(), async (request, response) =
     console.log(request.body);
 });
 
-app.start(3000).then(() => {
-    console.log("Bot is running on port 3000");
+app.start(config.get('port')).then(() => {
+    console.log("Bot is running on port " + config.get("port"));
 });

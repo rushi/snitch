@@ -84,9 +84,9 @@ class PipelineUpdateHandler extends Handler {
                 pipeline.set("isFullyGreen", isFullyGreen);
             } else {
                 const stageHistory = await Go.fetchStageHistory(pipeline.get("name"), pipeline.get("stage.name"));
-                const hasPreviousBuildSuceeded = this.hasPreviousBuildFailed(pipeline, stageHistory);
-                if (hasPreviousBuildSuceeded) {
-                    // Previous build suceeded, we don't need to notify again
+                const hasPreviousBuildSucceeded = this.hasPreviousBuildFailed(pipeline, stageHistory);
+                if (hasPreviousBuildSucceeded) {
+                    // Previous build succeeded, we don't need to notify again
                     return;
                 }
             }
@@ -94,7 +94,7 @@ class PipelineUpdateHandler extends Handler {
             await this.parseFailures(pipeline);
         }
 
-        let emails = new Set([pipeline.getCommitterEmail()]);
+        const emails = new Set([pipeline.getCommitterEmail()]);
         if (pipeline.getApprovedByEmail()) {
             emails.add(pipeline.getApprovedByEmail());
         }
@@ -108,7 +108,7 @@ class PipelineUpdateHandler extends Handler {
             return false;
         }
 
-        let user = await this.getChannelByEmail(email);
+        const user = await this.getChannelByEmail(email);
         if (!user) {
             return;
         }
