@@ -1,10 +1,11 @@
 const express = require("express");
-const { App, LogLevel, ExpressReceiver } = require("@slack/bolt");
+const { App, ExpressReceiver } = require("@slack/bolt");
 const config = require("config");
 
 const PipelineUpdateHandler = require("./handlers/PipelineUpdateHandler");
 const Go = require("./services/go");
 const Pipeline = require("./models/Pipeline");
+const AgentHandler = require("./handlers/AgentHandler");
 
 const receiver = new ExpressReceiver({
     signingSecret: config.get("slack.signingSecret"),
@@ -25,7 +26,7 @@ app.action({ callback_id: "build_response" }, async ({ action, say, ack }) => {
     let msg = "Error, invalid payload";
     if (action.name === "rerun") {
         const result = await Go.runFailedJobs(payload.uri);
-        msg = (result?.message || "Error trigerring build") + ` for ${payload.name}`;
+        msg = `${result?.message || "Error triggering build"} for ${payload.name}`;
     }
 
     if (action.name === "output" && payload.jobs?.length > 0) {
@@ -49,7 +50,11 @@ app.action({ callback_id: "build_response" }, async ({ action, say, ack }) => {
     await say(msg);
 });
 
-const handlers = [PipelineUpdateHandler];
+const handlers = [PipelineUpdateHandler, AgentHandler];
+
+receiver.router.get("/status", async (request, response) => {
+    response.send({ status: "SNITCH - OK" });
+});
 
 receiver.router.post("/api/webhooks", express.json(), async (request, response) => {
     const Handler = handlers.find((Handler) => {
@@ -69,6 +74,6 @@ receiver.router.post("/api/actions", express.json(), async (request, response) =
     console.log(request.body);
 });
 
-app.start(config.get('port')).then(() => {
-    console.log("Bot is running on port " + config.get("port"));
+app.start(config.get("port")).then(() => {
+    console.log(`🚀 Snitch started on port ${config.get("port")} Node ${process.version}`);
 });

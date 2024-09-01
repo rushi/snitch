@@ -151,7 +151,7 @@ class Pipeline extends Model {
                 }
             });
         } catch (err) {
-            console.log('Error while fetching junit XML', err.message);
+            console.log("Error while fetching junit XML", err.message);
         }
 
         return failures;

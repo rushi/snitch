@@ -98,7 +98,7 @@ class PipelineFailedNotification {
             }),
         };
 
-        if (failedJobs.length > 0 && failedJobs.length < 20 && pipeline.get('counter') < 10) {
+        if (failedJobs.length > 0 && failedJobs.length < 20 && pipeline.get("counter") < 10) {
             // Only give the re-run option if this build has been re-run fewer than 10 times
             // Force the engineer to re-check Go and not keep clicking this button
             actions.push(rerunAction);
@@ -112,7 +112,7 @@ class PipelineFailedNotification {
                 value: JSON.stringify({
                     pipeline: pipeline.get("name"),
                     name: pipeline.getName(),
-                    counter: pipeline.get('stage.counter'),
+                    counter: pipeline.get("stage.counter"),
                     stage: pipeline.get("stage.name"),
                     jobs: failedJobs.map((j) => j.name),
                 }),

@@ -1,26 +1,33 @@
 {
-    "name": "gobot",
-    "version": "0.1.0",
-    "description": "Go CI Slack Bot",
+    "name": "snitch",
+    "version": "0.2.0",
+    "description": "GoCD Slack Bot for notifications",
     "scripts": {
         "start": "node src/index.js",
-        "dev": "nodemon src/index.js",
+        "dev": "nodemon --delay 3 --watch src src/index.js",
         "format": "prettier --write ."
     },
     "devDependencies": {
-        "nodemon": "^2.0.7",
-        "prettier": "^2.2.1"
+        "nodemon": "^3.1.4",
+        "prettier": "^3.3.3"
     },
     "prettier": {
         "semi": true,
         "printWidth": 120,
         "trailingComma": "all",
+        "singleQuote": false,
+        "bracketSpacing": true,
+        "useTabs": false,
+        "arrowParens": "always",
+        "bracketSameLine": false,
         "tabWidth": 4
     },
     "dependencies": {
         "@slack/bolt": "^3.3.0",
         "axios": "^0.21.1",
+        "chalk": "^3.0.0",
         "config": "^3.3.6",
+        "dayjs": "^1.11.13",
         "fastify": "^3.14.2",
         "junit-viewer": "^4.11.1",
         "lodash": "^4.17.21",
