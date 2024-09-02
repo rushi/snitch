@@ -1,11 +1,13 @@
 {
-    "port": 3000,
+    "port": 6000,
     "go": {
         "url": "",
         "username": "",
         "password": "",
         "jobs": {
-            "artifactName": ["testoutput"],
+            "artifactName": [
+                "testoutput"
+            ],
             "junitXmlFileName": [
                 "junit.xml",
                 "jscs.xml",
@@ -15,16 +17,13 @@
             ]
         }
     },
-
     "slack": {
         "token": "",
         "signingSecret": ""
     },
-
     "jira": {
         "url": ""
     },
-
     "whitelist": {
         "emails": []
     }

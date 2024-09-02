@@ -13,10 +13,13 @@ class AgentHandler extends Handler {
     async handle(request) {
         const body = _.omit(request.body, ["operating_system"]);
         const isElastic = body.is_elastic;
-        const isDeployAgent = !isElastic && !body.host_name.includes("i-");
+        const isDeployAgent = !isElastic && !body.host_name.includes("i-") && !body.host_name.startsWith("ip-");
 
         const { host_name, agent_config_state, agent_state, build_state } = body;
         const now = dayjs().format("YYYY-MM-DD HH:mm");
+        if (!isDeployAgent) {
+            return;
+        }
 
         const agentName = isElastic ? host_name : chalk.green(host_name);
         const configState = agent_config_state === "Disabled" ? chalk.bold(agent_config_state) : agent_config_state;
@@ -25,15 +28,11 @@ class AgentHandler extends Handler {
 
         if (isDeployAgent) {
             if (agent_state === "LostContact") {
-                console.log(
-                    util.inspect(body, { colors: true, sorted: true, breakLength: 1000, depth: null, compact: true }),
-                );
-                console.log(chalk.bgRed.white(`[${now}] Non-Elastic Agent lost contact`));
+                AgentHandler.log(body);
+                console.log(chalk.bgRed.white(`[${now}] Deployment Agent lost contact`));
             } else if (agent_state === "Idle" && build_state === "Idle") {
-                console.log(
-                    util.inspect(body, { colors: true, sorted: true, breakLength: 1000, depth: null, compact: true }),
-                );
-                console.log(chalk.bgGreen.white(`[${now}] Non-Elastic Agent came online?`));
+                AgentHandler.log(body);
+                console.log(chalk.bgGreen.white(`[${now}] Deployment Agent came online?`));
             }
         }
 
@@ -41,6 +40,19 @@ class AgentHandler extends Handler {
         if (isDeployAgent) {
             console.log(" ".repeat(18), `https://sage.ci.xola.com/go/agents/${body.uuid}/job_run_history`);
         }
+    }
+
+    static log(data, options = {}) {
+        console.log(
+            util.inspect(data, {
+                colors: true,
+                sorted: true,
+                breakLength: 1000,
+                depth: null,
+                compact: true,
+                ...options,
+            }),
+        );
     }
 }
 

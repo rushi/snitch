@@ -5,7 +5,7 @@
     "scripts": {
         "start": "node src/index.js",
         "dev": "nodemon --delay 3 --watch src src/index.js",
-        "format": "prettier --write ."
+        "format": "prettier -l --write src"
     },
     "devDependencies": {
         "nodemon": "^3.1.4",
