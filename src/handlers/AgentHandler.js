@@ -2,7 +2,9 @@ const Handler = require("./Handler");
 const _ = require("lodash");
 const chalk = require("chalk");
 const dayjs = require("dayjs");
+const config = require("config");
 const util = require("util");
+const AgentUpdatedNotification = require("../templates/AgentUpdatedNotification");
 
 class AgentHandler extends Handler {
     static shouldHandle(request) {
@@ -18,6 +20,7 @@ class AgentHandler extends Handler {
         const { host_name, agent_config_state, agent_state, build_state } = body;
         const now = dayjs().format("YYYY-MM-DD HH:mm");
         if (!isDeployAgent) {
+            process.stdout.write(".");
             return;
         }
 
@@ -30,16 +33,37 @@ class AgentHandler extends Handler {
             if (agent_state === "LostContact") {
                 AgentHandler.log(body);
                 console.log(chalk.bgRed.white(`[${now}] Deployment Agent lost contact`));
+                this.doNotify(body, `Agent **${host_name}** in ${agent_state} state`);
             } else if (agent_state === "Idle" && build_state === "Idle") {
                 AgentHandler.log(body);
                 console.log(chalk.bgGreen.white(`[${now}] Deployment Agent came online?`));
+                this.doNotify(body, `**${host_name}** has come back online`);
             }
+        } else {
+            this.doNotify(body, "Testing");
         }
 
         console.log(`[${now}] ${agentName} Status: ${configState} State: ${agentState} • Build State: ${buildState}`);
         if (isDeployAgent) {
             console.log(" ".repeat(18), `https://sage.ci.xola.com/go/agents/${body.uuid}/job_run_history`);
         }
+    }
+
+    async doNotify(agent, text) {
+        const notification = new AgentUpdatedNotification(agent)?.toJSON(text);
+        try {
+            const response = await this.app.client.chat.postMessage({
+                text,
+                token: config.get("slack.token"),
+                channel: config.get("slack.defaultChannel"),
+                ...notification,
+            });
+            console.log("Slack message sent", response?.ok, response?.message.text ?? response);
+        } catch (error) {
+            console.log("Error sending slack message", chalk.red(error.message));
+            console.log(notification);
+        }
+        process.exit(0);
     }
 
     static log(data, options = {}) {

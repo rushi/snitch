@@ -73,9 +73,9 @@ class PipelineFailedNotification {
             fields.push({ title: `Failed Jobs (${failedJobs.length})`, value: message });
         }
 
-        const emails = [`Commited By: ${pipeline.getCommitterEmail()}`];
+        const emails = [`Committed By: ${pipeline.getCommitterEmail()}`];
         if (pipeline.getApprovedByEmail() && pipeline.getApprovedByEmail() !== pipeline.getCommitterEmail()) {
-            emails.push(`Trigerred by: ${pipeline.getApprovedByEmail()}`);
+            emails.push(`Triggered by: ${pipeline.getApprovedByEmail()}`);
         }
 
         let footer = `Status: ${pipeline.get("stage.result")}, well done`;
