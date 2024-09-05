@@ -1,9 +1,9 @@
-const path = require("path");
-const Pipeline = require("../models/Pipeline");
-const PipelineFailedNotification = require("../templates/PipelineFailedNotification");
-const config = require("config");
-const Handler = require("./Handler");
-const Go = require("../services/go");
+import { basename } from "path";
+import Pipeline from "../models/Pipeline.js";
+import PipelineFailedNotification from "../templates/PipelineFailedNotification.js";
+import config from "config";
+import Handler from "./Handler.js";
+import Go from "../services/go.js";
 
 class PipelineUpdateHandler extends Handler {
     static shouldHandle(request) {
@@ -29,7 +29,7 @@ class PipelineUpdateHandler extends Handler {
                 testCases.forEach((tc) => {
                     let line;
                     if (tc.file) {
-                        line = `${path.basename(tc.file)} Line: ${tc.line}\n`;
+                        line = `${basename(tc.file)} Line: ${tc.line}\n`;
                         if (detail) {
                             line = this.processTestCaseMessages(tc.messages, line);
                         } else {
@@ -140,4 +140,4 @@ class PipelineUpdateHandler extends Handler {
     }
 }
 
-module.exports = PipelineUpdateHandler;
+export default PipelineUpdateHandler;

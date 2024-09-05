@@ -1,4 +1,4 @@
-const { App } = require("@slack/bolt");
+import App from "@slack/bolt";
 
 class Handler {
     /**
@@ -17,4 +17,4 @@ class Handler {
     }
 }
 
-module.exports = Handler;
+export default Handler;

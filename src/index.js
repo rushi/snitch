@@ -1,17 +1,17 @@
-const express = require("express");
-const { App, ExpressReceiver } = require("@slack/bolt");
-const config = require("config");
+import { json } from "express";
+import Bolt from "@slack/bolt";
+import config from "config";
 
-const PipelineUpdateHandler = require("./handlers/PipelineUpdateHandler");
-const Go = require("./services/go");
-const Pipeline = require("./models/Pipeline");
-const AgentHandler = require("./handlers/AgentHandler");
+import PipelineUpdateHandler from "./handlers/PipelineUpdateHandler.js";
+import Go from "./services/go.js";
+import Pipeline from "./models/Pipeline.js";
+import AgentHandler from "./handlers/AgentHandler.js";
 
-const receiver = new ExpressReceiver({
+const receiver = new Bolt.ExpressReceiver({
     signingSecret: config.get("slack.signingSecret"),
 });
 
-const app = new App({
+const app = new Bolt.App({
     token: config.get("slack.token"),
     signingSecret: config.get("slack.signingSecret"),
     receiver,
@@ -25,7 +25,7 @@ app.action({ callback_id: "build_response" }, async ({ action, say, ack }) => {
 
     let msg = "Error, invalid payload";
     if (action.name === "rerun") {
-        const result = await Go.runFailedJobs(payload.uri);
+        const result = await runFailedJobs(payload.uri);
         msg = `${result?.message || "Error triggering build"} for ${payload.name}`;
     }
 
@@ -56,7 +56,7 @@ receiver.router.get("/status", async (request, response) => {
     response.send({ status: "SNITCH - OK" });
 });
 
-receiver.router.post("/api/webhooks", express.json(), async (request, response) => {
+receiver.router.post("/api/webhooks", json(), async (request, response) => {
     const Handler = handlers.find((Handler) => {
         return Handler.shouldHandle(request);
     });
@@ -70,7 +70,7 @@ receiver.router.post("/api/webhooks", express.json(), async (request, response) 
     response.send({ status: "OK" });
 });
 
-receiver.router.post("/api/actions", express.json(), async (request, response) => {
+receiver.router.post("/api/actions", json(), async (request, response) => {
     console.log(request.body);
 });
 

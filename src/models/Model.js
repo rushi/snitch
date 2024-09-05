@@ -1,4 +1,4 @@
-const _ = require("lodash");
+import { get as _get, set as _set } from "lodash-es";
 
 class Model {
     constructor(attributes) {
@@ -6,7 +6,7 @@ class Model {
     }
 
     get(path, defaultValue) {
-        return _.get(this.attributes, path, defaultValue);
+        return _get(this.attributes, path, defaultValue);
     }
 
     getModel(path, type = Model) {
@@ -14,7 +14,7 @@ class Model {
     }
 
     set(path, value) {
-        _.set(this.attributes, path, value);
+        _set(this.attributes, path, value);
         return this;
     }
 
@@ -23,4 +23,4 @@ class Model {
     }
 }
 
-module.exports = Model;
+export default Model;

@@ -1,10 +1,10 @@
-const Handler = require("./Handler");
-const _ = require("lodash");
-const chalk = require("chalk");
-const dayjs = require("dayjs");
-const config = require("config");
-const util = require("util");
-const AgentUpdatedNotification = require("../templates/AgentUpdatedNotification");
+import Handler from "./Handler.js";
+import { omit } from "lodash-es";
+import chalk from "chalk";
+import config from "config";
+import dayjs from "dayjs";
+import { inspect } from "util";
+import AgentUpdatedNotification from "../templates/AgentUpdatedNotification.js";
 
 class AgentHandler extends Handler {
     static shouldHandle(request) {
@@ -13,7 +13,7 @@ class AgentHandler extends Handler {
     }
 
     async handle(request) {
-        const body = _.omit(request.body, ["operating_system"]);
+        const body = omit(request.body, ["operating_system"]);
         const isElastic = body.is_elastic;
         const isDeployAgent = !isElastic && !body.host_name.includes("i-") && !body.host_name.startsWith("ip-");
 
@@ -35,9 +35,9 @@ class AgentHandler extends Handler {
                 console.log(chalk.bgRed.white(`[${now}] Deployment Agent lost contact`));
                 this.doNotify(body, `Agent **${host_name}** in ${agent_state} state`);
             } else if (agent_state === "Idle" && build_state === "Idle") {
-                AgentHandler.log(body);
-                console.log(chalk.bgGreen.white(`[${now}] Deployment Agent came online?`));
-                this.doNotify(body, `**${host_name}** has come back online`);
+                // AgentHandler.log(body);
+                // console.log(chalk.bgGreen.white(`[${now}] Deployment Agent came online?`));
+                // this.doNotify(body, `**${host_name}** has come back online`);
             }
         } else {
             this.doNotify(body, "Testing");
@@ -63,12 +63,11 @@ class AgentHandler extends Handler {
             console.log("Error sending slack message", chalk.red(error.message));
             console.log(notification);
         }
-        process.exit(0);
     }
 
     static log(data, options = {}) {
         console.log(
-            util.inspect(data, {
+            inspect(data, {
                 colors: true,
                 sorted: true,
                 breakLength: 1000,
@@ -80,4 +79,4 @@ class AgentHandler extends Handler {
     }
 }
 
-module.exports = AgentHandler;
+export default AgentHandler;

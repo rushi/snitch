@@ -1,9 +1,9 @@
-const config = require("config");
-const Model = require("./Model");
-const _ = require("lodash");
-const md5 = require("md5");
-const jv = require("junit-viewer");
-const Go = require("../services/go");
+import config from "config";
+import Model from "./Model.js";
+import { trimEnd } from "lodash-es";
+import md5 from "md5";
+import * as jv from "junit-viewer";
+import Go from "../services/go.js";
 
 class Pipeline extends Model {
     static STAGE_FAILED = "Failed";
@@ -94,7 +94,7 @@ class Pipeline extends Model {
         const repoUrl = new URL(this.get("build-cause.0.material.git-configuration.url"));
         repoUrl.username = "";
         repoUrl.password = "";
-        return _.trimEnd(repoUrl.toString(), ".git");
+        return trimEnd(repoUrl.toString(), ".git");
     }
 
     getCommitUrl() {
@@ -158,4 +158,4 @@ class Pipeline extends Model {
     }
 }
 
-module.exports = Pipeline;
+export default Pipeline;

@@ -2,10 +2,25 @@
     "name": "snitch",
     "version": "0.2.0",
     "description": "GoCD Slack Bot for notifications",
+    "type": "module",
     "scripts": {
         "start": "node src/index.js",
+        "monitor": "node src/monitor-elastic-agents.js start",
         "dev": "nodemon --delay 3 --watch src src/index.js",
         "format": "prettier -l --write src"
+    },
+    "dependencies": {
+        "@slack/bolt": "^3.3.0",
+        "axios": "^1.7.7",
+        "chalk": "^5.3.0",
+        "cheerio": "^1.0.0",
+        "config": "^3.3.6",
+        "cron": "^3.1.7",
+        "dayjs": "^1.11.13",
+        "junit-viewer": "^4.11.1",
+        "lodash-es": "^4.17.21",
+        "md5": "^2.3.0",
+        "node-notifier": "^10.0.1"
     },
     "devDependencies": {
         "nodemon": "^3.1.4",
@@ -21,16 +36,5 @@
         "arrowParens": "always",
         "bracketSameLine": false,
         "tabWidth": 4
-    },
-    "dependencies": {
-        "@slack/bolt": "^3.3.0",
-        "axios": "^0.21.1",
-        "chalk": "^3.0.0",
-        "config": "^3.3.6",
-        "dayjs": "^1.11.13",
-        "fastify": "^3.14.2",
-        "junit-viewer": "^4.11.1",
-        "lodash": "^4.17.21",
-        "md5": "^2.3.0"
     }
 }

@@ -1,5 +1,5 @@
-const axios = require("axios");
-const config = require("config");
+import axios from "axios";
+import config from "config";
 
 const api = axios.create({
     baseURL: config.get("go.url"),
@@ -77,4 +77,4 @@ const Go = {
     },
 };
 
-module.exports = Go;
+export default Go;

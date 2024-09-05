@@ -1,5 +1,4 @@
-const Pipeline = require("../models/Pipeline");
-const Go = require("../services/go");
+import Pipeline from "../models/Pipeline.js";
 
 class PipelineFailedNotification {
     /**
@@ -142,4 +141,4 @@ class PipelineFailedNotification {
     }
 }
 
-module.exports = PipelineFailedNotification;
+export default PipelineFailedNotification;
