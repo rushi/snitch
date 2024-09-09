@@ -25,7 +25,8 @@ async function check() {
         process.stdout.write(chalk.bold("    Tasks "));
         const runningTasks = getCount("Running tasks");
         const pendingTasks = getCount("Pending tasks");
-        console.log(`Running: ${runningTasks}   Pending: ${pendingTasks}`);
+        const totalTasks = runningTasks + pendingTasks;
+        console.log(`Running: ${runningTasks}   Pending: ${pendingTasks}`, chalk.bold(` Total: ${totalTasks}`));
         if (Number(pendingTasks) >= MAX_PENDING_TASKS) {
             console.log("    ", chalk.bgRed.white.bold(`Too many pending tasks (${pendingTasks})`));
         }
@@ -34,8 +35,7 @@ async function check() {
         const spot = getCount("Registered linux spot instances");
         const onDemand = getCount("Registered linux on-demand instances");
         const total = spot + onDemand;
-        const hasTotal = spot > 0 && onDemand > 0;
-        console.log(`   Spot: ${spot} On Demand: ${onDemand} ${hasTotal ? chalk.bold(`Total: ${total}`) : ""}`);
+        console.log(`   Spot: ${spot} On Demand: ${onDemand}`, chalk.bold(`  Total: ${total}`));
         if (total >= MAX_HOST_MACHINES) {
             console.log("    ", chalk.bgGreen.white.bold(`Max limit reached: ${total}`));
         }
@@ -55,7 +55,7 @@ async function check() {
 }
 
 if (process.argv[2] === "start") {
-    const expr = "*/1 * * * 1-5";
+    const expr = "*/2 * * * 1-5"; // */2 is every two minutes
     console.log(`${now()} 🚀 Starting Cron Job (${expr})`);
     check();
     const job = new CronJob(expr, check);
