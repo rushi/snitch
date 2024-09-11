@@ -1,5 +1,6 @@
 import { json } from "express";
 import Bolt from "@slack/bolt";
+import { isEmpty } from "lodash-es";
 import config from "config";
 
 import PipelineUpdateHandler from "./handlers/PipelineUpdateHandler.js";
@@ -7,13 +8,27 @@ import Go from "./services/go.js";
 import Pipeline from "./models/Pipeline.js";
 import AgentHandler from "./handlers/AgentHandler.js";
 
+const slack = config.get("slack");
+if (isEmpty(slack.token) || isEmpty(slack.signingSecret)) {
+    console.log(`ERROR: 'slack.token' or 'slack.signingSecret' is not provided`);
+    console.log(JSON.stringify(slack, null, 2));
+    process.exit(1);
+}
+
+const go = config.get("go");
+if (isEmpty(go.username) || isEmpty(go.password)) {
+    console.log(`ERROR: 'go.username' or 'go.password' is not provided`);
+    console.log(JSON.stringify(go, null, 2));
+    process.exit(1);
+}
+
 const receiver = new Bolt.ExpressReceiver({
-    signingSecret: config.get("slack.signingSecret"),
+    signingSecret: slack.signingSecret,
 });
 
 const app = new Bolt.App({
-    token: config.get("slack.token"),
-    signingSecret: config.get("slack.signingSecret"),
+    token: slack.token,
+    signingSecret: slack.signingSecret,
     receiver,
     // logLevel: LogLevel.DEBUG,
 });
