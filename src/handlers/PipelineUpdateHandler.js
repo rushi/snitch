@@ -1,11 +1,11 @@
-import chalk from "chalk";
-import config from "config";
-import { isEmpty } from "lodash-es";
 import { basename } from "path";
+import chalk from "chalk";
 import Pipeline from "../models/Pipeline.js";
-import Go from "../services/go.js";
 import PipelineFailedNotification from "../templates/PipelineFailedNotification.js";
+import config from "config";
 import Handler from "./Handler.js";
+import Go from "../services/go.js";
+import { isEmpty } from "lodash-es";
 
 class PipelineUpdateHandler extends Handler {
     static shouldHandle(request) {

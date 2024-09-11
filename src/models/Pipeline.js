@@ -2,7 +2,7 @@ import config from "config";
 import Model from "./Model.js";
 import { trimEnd } from "lodash-es";
 import md5 from "md5";
-import * as jv from "junit-viewer";
+import jv from "junit-viewer";
 import Go from "../services/go.js";
 import chalk from "chalk";
 
