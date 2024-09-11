@@ -4,6 +4,7 @@ import { trimEnd } from "lodash-es";
 import md5 from "md5";
 import * as jv from "junit-viewer";
 import Go from "../services/go.js";
+import chalk from "chalk";
 
 class Pipeline extends Model {
     static STAGE_FAILED = "Failed";
@@ -148,8 +149,9 @@ class Pipeline extends Model {
                 try {
                     failures.push(jv.parseXML(junit));
                 } catch (err) {
-                    console.log("Error parsing XML", err.message);
-                    console.log("Pipeline", this.getUri());
+                    console.log(chalk.red("Error parsing XML"), this.getUri());
+                    console.error(err.message);
+                    console.log();
                 }
             });
         } catch (err) {

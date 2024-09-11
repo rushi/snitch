@@ -81,7 +81,6 @@ class PipelineUpdateHandler extends Handler {
             return;
         }
 
-        const name = pipeline.getName();
         if (pipeline.hasSucceeded()) {
             const isFullyGreen = await Go.isEntirePipelineGreen(pipeline.getName());
             if (isFullyGreen) {
@@ -124,7 +123,8 @@ class PipelineUpdateHandler extends Handler {
             return;
         }
 
-        console.log(`Notify ${pipeline.getCommitterName()} ${email} ${JSON.stringify(user)}`);
+        const name = pipeline.getCommitterName() ?? user.name ?? "N/A";
+        console.log(`Notify ${chalk.green(name)} ${email} ${JSON.stringify(user)}`);
 
         const notification = await new PipelineFailedNotification(pipeline, user).toJSON();
         await this.app.client.chat.postMessage({
@@ -132,6 +132,7 @@ class PipelineUpdateHandler extends Handler {
             channel: user.id,
             ...notification,
         });
+        console.log(JSON.stringify(notification, null, 2));
     }
 
     async getChannelByEmail(email) {
