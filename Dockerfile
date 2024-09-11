@@ -1,7 +1,7 @@
 ARG NODE_VERSION=20
 FROM node:${NODE_VERSION}-bookworm-slim AS builder
 
-RUN apt-get update && apt-get install -y make
+RUN apt-get update
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ RUN npm ci --include=dev
 COPY . .
 
 FROM node:${NODE_VERSION}-bookworm-slim AS base
-RUN apt-get update && apt-get install -y make
+RUN apt-get update
 WORKDIR /app
 
 RUN chown -R node:node /app
