@@ -100,7 +100,7 @@ class PipelineUpdateHandler extends Handler {
 
         const approvedEmail = pipeline.getApprovedByEmail();
         const committerEmail = pipeline.getCommitterEmail();
-        console.log(`Pipeline: ${name} ${pipeline.getCommitterName()} ${committerEmail} and ${approvedEmail}`);
+        // console.log(`Pipeline: ${name} ${pipeline.getCommitterName()} ${committerEmail} and ${approvedEmail}`);
 
         const emails = new Set();
         if (committerEmail) {

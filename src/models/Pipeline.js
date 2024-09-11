@@ -149,7 +149,7 @@ class Pipeline extends Model {
                     failures.push(jv.parseXML(junit));
                 } catch (err) {
                     console.log("Error parsing XML", err.message);
-                    console.log(junit);
+                    console.log("Pipeline", this.getUri());
                 }
             });
         } catch (err) {
