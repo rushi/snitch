@@ -47,7 +47,9 @@ class PipelineUpdateHandler extends Handler {
             });
         });
 
-        console.log("parsed failures", failures.size, failures);
+        if (failures.size > 0) {
+            console.log("parsed failures", failures.size, failures);
+        }
         failures.size > 0 && pipeline.set("failures", failures);
     }
 
@@ -133,7 +135,8 @@ class PipelineUpdateHandler extends Handler {
                 return { id: result.user?.id, name: result.user?.real_name, avatar: result.user?.profile?.image_192 };
             }
         } catch (err) {
-            console.log("Error finding user", err.message);
+            console.log(`Error finding user by email: '${email}'`);
+            console.log(err.message);
         }
 
         return null;
