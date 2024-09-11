@@ -4,6 +4,7 @@ import PipelineFailedNotification from "../templates/PipelineFailedNotification.
 import config from "config";
 import Handler from "./Handler.js";
 import Go from "../services/go.js";
+import { isEmpty } from "lodash-es";
 
 class PipelineUpdateHandler extends Handler {
     static shouldHandle(request) {
@@ -105,8 +106,8 @@ class PipelineUpdateHandler extends Handler {
     }
 
     async doNotify(pipeline, email) {
-        if (email === "noreply@github.com") {
-            console.log(`${email} skipping`);
+        if (email === "noreply@github.com" || isEmpty(email)) {
+            console.log(`'${email}' skipping for ${pipeline.getUrl()} ${pipeline.getCommitHash()}`);
             return false;
         }
 
