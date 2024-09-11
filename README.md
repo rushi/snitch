@@ -9,6 +9,11 @@ A webhook based Slack notifier for [GoCD](https://www.gocd.org/)
 
 ## Install
 
+```shell
+docker build -t snitch .
+docker run -p 6000:6000 -it snitch
+```
+
 Create/Edit `/var/go/webhook_notify.properties` file and add an entry for the webhook. Example:
 
 ```ini
