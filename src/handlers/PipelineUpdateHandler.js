@@ -97,9 +97,13 @@ class PipelineUpdateHandler extends Handler {
             await this.parseFailures(pipeline);
         }
 
-        const emails = new Set([pipeline.getCommitterEmail()]);
-        if (pipeline.getApprovedByEmail()) {
-            emails.add(pipeline.getApprovedByEmail());
+        const committerEmail = pipeline.getCommitterEmail();
+        const approvedEmail = pipeline.getApprovedByEmail();
+        console.log(`Pipeline: ${pipeline.getName()} Committer: ${committerEmail} Approved: ${approvedEmail}`);
+
+        const emails = new Set([committerEmail]);
+        if (approvedEmail) {
+            emails.add(approvedEmail);
         }
 
         emails.forEach((email) => this.doNotify(pipeline, email));

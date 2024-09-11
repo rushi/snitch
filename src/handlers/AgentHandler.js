@@ -20,7 +20,7 @@ class AgentHandler extends Handler {
         const { host_name, agent_config_state, agent_state, build_state } = body;
         const now = dayjs().format("YYYY-MM-DD HH:mm");
         if (!isDeployAgent) {
-            process.stdout.write(".");
+            // process.stdout.write(".");
             return;
         }
 
