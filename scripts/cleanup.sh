@@ -4,4 +4,4 @@ echo -e "\nRemoving all containers"
 docker rm "$(docker ps -a -q)"
 
 echo -e "\nRemoving all images"
-docker rmi -f "$(docker images -a -q)"
+docker image rm "$(docker images -a -q)"
