@@ -81,6 +81,7 @@ class PipelineUpdateHandler extends Handler {
             return;
         }
 
+        const name = pipeline.getName();
         if (pipeline.hasSucceeded()) {
             const isFullyGreen = await Go.isEntirePipelineGreen(pipeline.getName());
             if (isFullyGreen) {
@@ -97,11 +98,14 @@ class PipelineUpdateHandler extends Handler {
             await this.parseFailures(pipeline);
         }
 
-        const committerEmail = pipeline.getCommitterEmail();
         const approvedEmail = pipeline.getApprovedByEmail();
-        console.log(`Pipeline: ${pipeline.getName()} Committer: ${committerEmail} Approved: ${approvedEmail}`);
+        const committerEmail = pipeline.getCommitterEmail();
+        console.log(`Pipeline: ${name} ${pipeline.getCommitterName()} ${committerEmail} and ${approvedEmail}`);
 
-        const emails = new Set([committerEmail]);
+        const emails = new Set();
+        if (committerEmail) {
+            emails.add(committerEmail);
+        }
         if (approvedEmail) {
             emails.add(approvedEmail);
         }

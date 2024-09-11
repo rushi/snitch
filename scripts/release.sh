@@ -13,7 +13,8 @@ echo -e "\nRunning containers:"
 docker ps -a
 docker stop $CONTAINER_NAME
 
-echo -e "\n\033[32mStarting ${CONTAINER_NAME}:\033[0m"
+echo -e "\n\033[32mStarting ${CONTAINER_NAME}\033[0m"
+sleep 5
 docker run --name $CONTAINER_NAME --rm -d -p 6000:6000 $IMAGE_NAME
 echo -e "\n$(docker ps -a)"
 

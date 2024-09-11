@@ -37,7 +37,8 @@ class Pipeline extends Model {
     }
 
     getCommitterEmail() {
-        return this.get("build-cause.0.modifications.0.data.committerEmail");
+        const email = this.get("build-cause.0.modifications.0.data.committerEmail") ?? "";
+        return email && email.length > 1 ? email : null;
     }
 
     getCommitHash() {
