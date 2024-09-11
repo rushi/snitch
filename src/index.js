@@ -1,12 +1,12 @@
-import { json } from "express";
 import Bolt from "@slack/bolt";
-import { isEmpty } from "lodash-es";
 import config from "config";
+import { json } from "express";
+import { isEmpty } from "lodash-es";
 
-import PipelineUpdateHandler from "./handlers/PipelineUpdateHandler.js";
-import Go from "./services/go.js";
-import Pipeline from "./models/Pipeline.js";
 import AgentHandler from "./handlers/AgentHandler.js";
+import PipelineUpdateHandler from "./handlers/PipelineUpdateHandler.js";
+import Pipeline from "./models/Pipeline.js";
+import Go from "./services/go.js";
 
 const slack = config.get("slack");
 if (isEmpty(slack.token) || isEmpty(slack.signingSecret)) {
@@ -90,5 +90,5 @@ receiver.router.post("/api/actions", json(), async (request, response) => {
 });
 
 app.start(config.get("port")).then(() => {
-    console.log(`🚀 Snitch started on port ${config.get("port")} Node ${process.version}`);
+    console.log(`🚀 Snitch started on port ${config.get("port")} GoCD ${go.url} Node ${process.version}`);
 });
