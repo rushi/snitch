@@ -119,6 +119,7 @@ class PipelineFailedNotification {
         }
 
         // console.log('actions', actions);
+        const title = `${pipeline.getCommitHash()} ${pipeline.getCommitMessage()}`;
 
         return {
             attachments: [
@@ -128,9 +129,9 @@ class PipelineFailedNotification {
                     pretext: pretext.trim(),
                     author_name: this.user.name,
                     author_icon: this.user.avatar,
-                    title: `${pipeline.getCommitHash()} ${pipeline.getCommitMessage()}`,
+                    title: title?.trim() ?? "N/A",
                     title_link: pipeline.getCommitUrl(),
-                    text: emails.join(" "),
+                    text: emails.join(" ")?.trim(),
                     fields,
                     footer,
                     actions,

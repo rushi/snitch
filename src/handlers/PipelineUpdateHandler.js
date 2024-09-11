@@ -128,9 +128,11 @@ class PipelineUpdateHandler extends Handler {
         console.log(`Notify ${chalk.green(name)} ${email} ${JSON.stringify(user)}`);
 
         const notification = await new PipelineFailedNotification(pipeline, user).toJSON();
+        const title = notification ? notification.attachments?.[0].pretext ?? "N/A";
         await this.app.client.chat.postMessage({
             token: config.get("slack.token"),
             channel: user.id,
+            title,
             ...notification,
         });
         console.log(JSON.stringify(notification, null, 2));
