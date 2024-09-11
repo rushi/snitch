@@ -129,13 +129,15 @@ class PipelineUpdateHandler extends Handler {
 
         const notification = await new PipelineFailedNotification(pipeline, user).toJSON();
         const title = notification ? notification.attachments?.[0]?.pretext ?? "N/A" : "N/A";
-        await this.app.client.chat.postMessage({
+        const payload = {
             token: config.get("slack.token"),
             channel: user.id,
             title,
             ...notification,
-        });
-        console.log(JSON.stringify(notification, null, 2));
+        };
+        const response = await this.app.client.chat.postMessage(payload);
+        console.log(JSON.stringify(payload, null, 2));
+        console.log(response);
     }
 
     async getChannelByEmail(email) {

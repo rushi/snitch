@@ -16,6 +16,9 @@ docker stop $CONTAINER_NAME
 echo -e "\n\033[32mStarting ${CONTAINER_NAME}\033[0m"
 sleep 5
 docker run --name $CONTAINER_NAME --rm -d -p 6000:6000 $IMAGE_NAME
+
+# Wait a little to ensure the container has not exited
+sleep 5
 echo -e "\n$(docker ps -a)"
 
 echo -e "\nRun 'docker logs -f ${CONTAINER_NAME}' to show logs\n"
