@@ -42,10 +42,11 @@ async function check() {
 
         // TODO: Get errors from the page when or if they show up. I don't know the selector for that yet
         // Guess based on https://github.com/gocd/gocd-ecs-elastic-agent/blob/master/src/main/resources/error.template.ftlh#L45
-        if ($(`div.error-container`).length > 0) {
-            const text = $(`div.error-container`).text();
-            console.log(chalk.red("Possible error on status page. Please check."));
-            console.log(text);
+        if ($(`.event.error`).length > 0) {
+            const header = $(`.event.error .event-header`).text();
+            const description = $(`.event.error .event-description`).text();
+            console.log(header);
+            console.log(chalk.red(description));
             console.log();
         }
     } else {
