@@ -5,11 +5,12 @@ import config from "config";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { CronJob } from "cron";
+import { notify } from "./services/slack.js";
 
 const now = () => dayjs().format("HH:mm:ss");
 const url = config.get("go.url") + "/go/admin/status_reports/com.thoughtworks.gocd.elastic-agent.ecs/cluster/CI";
 
-const MAX_PENDING_TASKS = 20;
+const MAX_PENDING_TASKS = 15;
 const MAX_HOST_MACHINES = 40;
 
 async function check() {
@@ -29,6 +30,7 @@ async function check() {
         console.log(`Running: ${runningTasks}   Pending: ${pendingTasks}`, chalk.bold(` Total: ${totalTasks}`));
         if (Number(pendingTasks) >= MAX_PENDING_TASKS) {
             console.log("    ", chalk.bgRed.white.bold(`Too many pending tasks (${pendingTasks})`));
+            await notify(`🚨 Too many pending tasks: ${pendingTasks} Running: ${runningTasks}`);
         }
 
         process.stdout.write(chalk.bold("Instances "));
@@ -37,7 +39,8 @@ async function check() {
         const total = spot + onDemand;
         console.log(`   Spot: ${spot} On Demand: ${onDemand}`, chalk.bold(`  Total: ${total}`));
         if (total >= MAX_HOST_MACHINES) {
-            console.log("    ", chalk.bgGreen.white.bold(`Max limit reached: ${total}`));
+            console.log("    ", chalk.bgGreen.white.bold(`Max limit reached: ${total}/${MAX_HOST_MACHINES}`));
+            await notify(`🚨 Max limit of host machines reached: ${total}/${MAX_HOST_MACHINES}`);
         }
 
         // TODO: Get errors from the page when or if they show up. I don't know the selector for that yet
@@ -48,6 +51,7 @@ async function check() {
             console.log(header);
             console.log(chalk.red(description));
             console.log();
+            await notify(`🚨 ${header}\n${description}`);
         }
     } else {
         console.log(response.status);

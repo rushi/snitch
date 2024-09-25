@@ -48,4 +48,4 @@ RUN npm install -g pm2 --no-fund --no-audit --no-update-notifier
 RUN chown -R node:node /app
 USER node
 
-CMD ["pm2-runtime", "start", "npm", "--", "start"]
+CMD ["pm2-runtime", "pm2.config.cjs"]
