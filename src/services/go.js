@@ -14,7 +14,9 @@ const Go = {
             console.log("Rerun response", data);
             return data;
         } catch (err) {
-            console.log("Error re-triggering", err.message);
+            console.log(chalk.red("Error re-running failed jobs"), uri);
+            console.error(err.message);
+            console.log();
             return { message: err.message };
         }
     },
@@ -35,7 +37,7 @@ const Go = {
                     return api.get(file.url, headers).then((xml) => xml.data);
                 }
             } else {
-                console.log("Weird, no data for", jobName);
+                console.log(`No jUnit XML files found within the artifacts of the job`, { name, stage, jobName });
             }
         });
     },
@@ -47,7 +49,9 @@ const Go = {
             const { data } = await api.get(url, headers);
             return data;
         } catch (err) {
-            console.log("Error fetching stage history", err.message);
+            console.log(chalk.red("Error fetching stage history"), url);
+            console.error(err.message);
+            console.log();
         }
         return null;
     },
@@ -55,14 +59,12 @@ const Go = {
     async fetchPipelineInstance(pipeline) {
         const url = `/go/api/pipelines/${pipeline}`;
         try {
-            const { data } = await api.get(url, {
-                headers: {
-                    Accept: "application/vnd.go.cd.v1+json",
-                },
-            });
+            const { data } = await api.get(url, { headers: { Accept: "application/vnd.go.cd.v1+json" } });
             return data;
         } catch (err) {
-            console.log(`Error fetching pipeline ${url}`, err.message);
+            console.log(chalk.red("Error fetching pipeline instance"), url);
+            console.error(err.message);
+            console.log();
             return [];
         }
     },
