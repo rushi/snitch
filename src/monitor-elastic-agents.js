@@ -57,7 +57,7 @@ async function check() {
 
 if (process.argv[2] === "start") {
     const expr = "*/2 * * * 1-5"; // */2 is every two minutes
-    console.log(`${now()} 🚀 Starting Cron Job (${expr})`);
+    console.log(`${now()} 🚀 Starting Cron Job for agents health (${expr})`);
     check();
     const job = new CronJob(expr, check);
     job.start();

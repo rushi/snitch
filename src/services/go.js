@@ -1,5 +1,6 @@
 import axios from "axios";
 import config from "config";
+import chalk from "chalk";
 
 const api = axios.create({
     baseURL: config.get("go.url"),
@@ -63,6 +64,19 @@ const Go = {
             return data;
         } catch (err) {
             console.log(chalk.red("Error fetching pipeline instance"), url);
+            console.error(err.message);
+            console.log();
+            return [];
+        }
+    },
+
+    async fetchServerHealth() {
+        const url = `/go/api/server_health_messages`;
+        try {
+            const { data } = await api.get(url, { headers: { Accept: "application/vnd.go.cd.v1+json" } });
+            return data;
+        } catch (err) {
+            console.log(chalk.red("Error fetching server health"), url);
             console.error(err.message);
             console.log();
             return [];
