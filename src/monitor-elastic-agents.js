@@ -30,7 +30,7 @@ async function check() {
         console.log(`Running: ${runningTasks}   Pending: ${pendingTasks}`, chalk.bold(` Total: ${totalTasks}`));
         if (Number(pendingTasks) >= MAX_PENDING_TASKS) {
             console.log("    ", chalk.bgRed.white.bold(`Too many pending tasks (${pendingTasks})`));
-            await notify(`🚨 Too many pending tasks: ${pendingTasks} Running: ${runningTasks}`);
+            await notify(`:package: ${now()} There are ${pendingTasks} pending tasks. ${runningTasks} are running. Please check ECS https://us-east-1.console.aws.amazon.com/ecs/v2/home`);
         }
 
         process.stdout.write(chalk.bold("Instances "));
@@ -40,7 +40,7 @@ async function check() {
         console.log(`   Spot: ${spot} On Demand: ${onDemand}`, chalk.bold(`  Total: ${total}`));
         if (total >= MAX_HOST_MACHINES) {
             console.log("    ", chalk.bgGreen.white.bold(`Max limit reached: ${total}/${MAX_HOST_MACHINES}`));
-            await notify(`🚨 Max limit of host machines reached: ${total}/${MAX_HOST_MACHINES}`);
+            // await notify(`Max limit of host machines reached: ${total}/${MAX_HOST_MACHINES}. Nothing bad here, just FYI 👏🏼`);
         }
 
         // TODO: Get errors from the page when or if they show up. I don't know the selector for that yet
@@ -51,7 +51,7 @@ async function check() {
             console.log(header);
             console.log(chalk.red(description));
             console.log();
-            await notify(`🚨 ${header}\n${description}`);
+            await notify(`🚨 ${now()} *${description}*\n\`\`\`${header}\`\`\``);
         }
     } else {
         console.log(response.status);

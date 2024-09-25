@@ -22,7 +22,7 @@ async function check() {
     let counter = 0;
     const pipelinesProcessed = [];
 
-    const NOTIFY_MAX_MINUTES = 5;
+    const NOTIFY_MAX_MINUTES = 6;
     const pipelineNotifyMessages = [];
 
     data.forEach((info) => {
@@ -50,25 +50,23 @@ async function check() {
         console.log(spacer, `${++counter} ${info.level}`, info.message);
         if (pipelineName && duration && duration[1]) {
             const minutes = Number(duration[1]);
-            console.log(
-                spacer,
-                `${ticketNumber} Pipeline ${pipelineName[1]} waiting for ${chalk.red(minutes)} minutes`,
-            );
+            const name = pipelineName[1].split("/")?.[0] ?? pipelineName[1];
+            console.log(spacer, `${ticketNumber} Pipeline ${name} waiting for ${chalk.red(minutes)} minutes`);
             pipelinesProcessed.push(pipelineName);
             ticketNumber && pipelinesProcessed.push(ticketNumber);
-            if (minutes > NOTIFY_MAX_MINUTES) {
-                pipelineNotifyMessages.push(`:warning: Pipeline *${pipelineName[1]}* waiting for *${minutes}* minutes`);
+            const message = `Pipeline *${name}* waiting for *${minutes}* minutes`;
+            if (minutes > NOTIFY_MAX_MINUTES && !pipelineNotifyMessages.includes(message)) {
+                pipelineNotifyMessages.push(message);
             }
         } else {
             console.log(spacer, chalk.dim(info.detail));
         }
     });
 
-    console.log();
-
     if (pipelineNotifyMessages.length > 0) {
-        await notify(pipelineNotifyMessages.join("\n"));
+        await notify(`:gocd-cancel: ${now()} ${pipelineNotifyMessages.length} affected pipelines\n` + pipelineNotifyMessages.join("\n"));
     }
+    console.log();
 }
 
 if (process.argv[2] === "start") {

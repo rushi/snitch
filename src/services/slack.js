@@ -11,7 +11,11 @@ export const notify = async (text, blocks = []) => {
             blocks,
             channel: config.get("slack.defaultChannel"),
         });
-        console.log("Slack message sent", response?.ok, response?.message.text ?? response);
+        if (response?.ok) {
+            console.log(chalk.dim("Slack message sent"));
+        } else {
+            console.log("Slack message sent", response?.ok, response?.message.text ?? response);
+        }
     } catch (error) {
         console.log("Error sending slack message", chalk.red(error.message));
         console.log(text);
