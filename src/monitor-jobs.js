@@ -1,11 +1,13 @@
 import chalk from "chalk";
 import { CronJob } from "cron";
 import dayjs from "dayjs";
+import { getElasticAgentsInfo } from "./services/elastic-agents.js";
 import Go from "./services/go.js";
 import { notify } from "./services/slack.js";
 
 const now = () => dayjs().format("HH:mm:ss");
 const messagesToSkip = [/Modification check failed/];
+const pad = (value) => String(value).padStart(2, " ");
 
 async function check() {
     const data = await Go.fetchServerHealth();
@@ -49,7 +51,7 @@ async function check() {
                 const name = pipelineMatch[1].split("/")?.[0] ?? pipelineMatch[1];
                 if (!pipelineMap[name]) {
                     console.log(spacer, `${ticketNumber} Pipeline ${name} waiting for ${chalk.red(minutes)} minutes`);
-                    pipelineMap[name] = { name, minutes, count: 0, pipelines: [] }
+                    pipelineMap[name] = { name, minutes, count: 0, pipelines: [] };
                 }
                 pipelineMap[name].count += 1;
                 pipelineMap[name].pipelines.push(pipelineMatch[1]);
@@ -61,17 +63,34 @@ async function check() {
         }
     });
 
+    const pad = (count) => `${String(count).padStart(2, " ")}`;
+
     let message = "";
     let totalJobs = 0;
     const totalPipelines = Object.keys(pipelineMap).length;
     for (const pipeline in pipelineMap) {
         const { name, count, minutes } = pipelineMap[pipeline];
-        message += `${count} x ${name} waiting for *${minutes} minutes*\n`;
+        message += `Stuck for *${pad(minutes)}* minutes: *${pad(count)}* x ${name} jobs.\n`;
         totalJobs += count;
     }
+
     if (totalPipelines > 0) {
-        await notify(`${now()} :gocd-cancel: *${totalJobs} affected jobs across ${totalPipelines} pipelines*\n\n${message}`);
+        const header = `*${totalJobs} affected jobs* across ${totalPipelines} pipelines. <https://sage.ci.xola.com/go/admin/status_reports/com.thoughtworks.gocd.elastic-agent.ecs/cluster/CI|See overview>.`;
+        const { tasks, instances, errorMessages } = await getElasticAgentsInfo();
+        const attachments = [
+            {
+                text: `Tasks:     _Pending:_ ${pad(tasks.pending)}        _Running:_ ${pad(tasks.running)}  = _${pad(instances.total)} Total_`,
+            },
+            {
+                text: `Instances:    _Spot:_ ${pad(instances.spot)} _On Demand:_ ${pad(instances.onDemand)}  = _${pad(instances.total)} Total_`,
+            },
+        ];
+        if (errorMessages.header?.length > 0) {
+            attachments.push({ text: `\n*${errorMessages.description}*\n\`\`\`${errorMessages.header}\`\`\`\n` });
+        }
+        await notify(`${header}\n\n${message}`, [], { username: "GoCD Snitch - Stuck Jobs", attachments });
     }
+
     console.log();
 }
 
