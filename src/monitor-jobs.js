@@ -23,7 +23,7 @@ async function check() {
     const pipelinesProcessed = [];
 
     const NOTIFY_MAX_MINUTES = 6;
-    const pipelineNotifyMessages = [];
+    const pipelineMap = {};
 
     data.forEach((info) => {
         const re = new RegExp(/\b[A-Z0-9]{2,5}-\d{1,5}\b/, "gmi");
@@ -41,36 +41,43 @@ async function check() {
         }
 
         const duration = info.detail.match(/in the last ([0-9]+) minute/);
-        const pipelineName = info.message.match(/Job '(.*)' is not responding/);
-        if (pipelinesProcessed.includes(pipelineName) || pipelinesProcessed.includes(ticketNumber)) {
-            counter++;
-            return;
-        }
-
-        console.log(spacer, `${++counter} ${info.level}`, info.message);
-        if (pipelineName && duration && duration[1]) {
+        const pipelineMatch = info.message.match(/Job '(.*)' is not responding/);
+        // console.log(spacer, `${++counter} ${info.level}`, info.message);
+        if (pipelineMatch && duration && duration[1]) {
             const minutes = Number(duration[1]);
-            const name = pipelineName[1].split("/")?.[0] ?? pipelineName[1];
-            console.log(spacer, `${ticketNumber} Pipeline ${name} waiting for ${chalk.red(minutes)} minutes`);
-            pipelinesProcessed.push(pipelineName);
-            ticketNumber && pipelinesProcessed.push(ticketNumber);
-            const message = `Pipeline *${name}* waiting for *${minutes}* minutes`;
-            if (minutes > NOTIFY_MAX_MINUTES && !pipelineNotifyMessages.includes(message)) {
-                pipelineNotifyMessages.push(message);
+            if (minutes > NOTIFY_MAX_MINUTES) {
+                const name = pipelineMatch[1].split("/")?.[0] ?? pipelineMatch[1];
+                if (!pipelineMap[name]) {
+                    console.log(spacer, `${ticketNumber} Pipeline ${name} waiting for ${chalk.red(minutes)} minutes`);
+                    pipelineMap[name] = { name, minutes, count: 0, pipelines: [] }
+                }
+                pipelineMap[name].count += 1;
+                pipelineMap[name].pipelines.push(pipelineMatch[1]);
+                pipelinesProcessed.push(name);
+                ticketNumber && pipelinesProcessed.push(ticketNumber);
             }
         } else {
             console.log(spacer, chalk.dim(info.detail));
         }
     });
 
-    if (pipelineNotifyMessages.length > 0) {
-        await notify(`:gocd-cancel: ${now()} ${pipelineNotifyMessages.length} affected pipelines\n` + pipelineNotifyMessages.join("\n"));
+    let message = "";
+    let totalJobs = 0;
+    const totalPipelines = Object.keys(pipelineMap).length;
+    for (const pipeline in pipelineMap) {
+        const { name, count, minutes } = pipelineMap[pipeline];
+        message += `${count} x ${name} waiting for *${minutes} minutes*\n`;
+        totalJobs += count;
+    }
+    if (totalPipelines > 0) {
+        await notify(`${now()} :gocd-cancel: *${totalJobs} affected jobs across ${totalPipelines} pipelines*\n\n${message}`);
     }
     console.log();
 }
 
 if (process.argv[2] === "start") {
-    const expr = "*/5 * * * 1-5"; // */2 is every two minutes (see crontab.guru)
+    const interval = process.argv[3] ?? 5;
+    const expr = `*/${interval} * * * 1-5`; // */2 is every two minutes (see crontab.guru)
     console.log(`${now()} 🚀 Starting Cron Job for server health (${expr})`);
     check();
     const job = new CronJob(expr, check);
