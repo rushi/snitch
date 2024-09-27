@@ -24,7 +24,7 @@ async function check() {
     let counter = 0;
     const pipelinesProcessed = [];
 
-    const NOTIFY_MAX_MINUTES = 6;
+    const NOTIFY_MAX_MINUTES = 10;
     const pipelineMap = {};
 
     data.forEach((info) => {
@@ -95,7 +95,7 @@ async function check() {
 }
 
 if (process.argv[2] === "start") {
-    const interval = process.argv[3] ?? 5;
+    const interval = process.argv[3] ?? 10;
     const expr = `*/${interval} * * * 1-5`; // */2 is every two minutes (see crontab.guru)
     console.log(`${now()} 🚀 Starting Cron Job for server health (${expr})`);
     check();
