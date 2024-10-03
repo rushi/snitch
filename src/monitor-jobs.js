@@ -79,7 +79,7 @@ async function check() {
         const { tasks, instances, errorMessages } = await getElasticAgentsInfo();
         const attachments = [
             {
-                text: `Tasks:     _Pending:_ ${pad(tasks.pending)}        _Running:_ ${pad(tasks.running)}  = _${pad(instances.total)} Total_`,
+                text: `Tasks:     _Pending:_ ${pad(tasks.pending)}        _Running:_ ${pad(tasks.running)}  = _${pad(tasks.total)} Total_`,
             },
             {
                 text: `Instances:    _Spot:_ ${pad(instances.spot)} _On Demand:_ ${pad(instances.onDemand)}  = _${pad(instances.total)} Total_`,
