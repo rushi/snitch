@@ -70,7 +70,7 @@ async function check() {
     const totalPipelines = Object.keys(pipelineMap).length;
     for (const pipeline in pipelineMap) {
         const { name, count, minutes } = pipelineMap[pipeline];
-        message += `Stuck for *${pad(minutes)}* minutes: *${pad(count)}* x ${name} jobs.\n`;
+        message += `Stuck for *${pad(minutes)}* minutes: *${pad(count)}* x <https://sage.ci.xola.com/go/pipelines#!/${name}|${name}> jobs.\n`;
         totalJobs += count;
     }
 
